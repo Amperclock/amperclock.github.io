@@ -24,7 +24,7 @@ github_username:  amperclock
 
 # Build settings
 markdown: kramdown
-theme: jekyll-theme-midnight
+theme: minima
 minima:
         skin: dark
 plugins:

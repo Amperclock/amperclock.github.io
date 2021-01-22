@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="3.9.0">Jekyll</generator><link href="http://localhost:4000/feed.xml" rel="self" type="application/atom+xml" /><link href="http://localhost:4000/" rel="alternate" type="text/html" /><updated>2021-01-22T17:41:10+01:00</updated><id>http://localhost:4000/feed.xml</id><title type="html">Amperclock’s Blog</title><subtitle>Small blog about infosec, security tools developpement and howtos.</subtitle><entry><title type="html">Creating the blog with Jekyll</title><link href="http://localhost:4000/jekyll/creation/2021/01/22/creating-the-blog-with-Jekyll.html" rel="alternate" type="text/html" title="Creating the blog with Jekyll" /><published>2021-01-22T13:30:34+01:00</published><updated>2021-01-22T13:30:34+01:00</updated><id>http://localhost:4000/jekyll/creation/2021/01/22/creating-the-blog-with-Jekyll</id><content type="html" xml:base="http://localhost:4000/jekyll/creation/2021/01/22/creating-the-blog-with-Jekyll.html">&lt;p&gt;Sooo, this is the first post of this blog. In the future I’ll write about infosec, the development  of my personal tools and HOWTOS of a variety of subjects .The website is entirely written in markdown, built with Jekyll and hosted/served by GitHub.&lt;/p&gt;
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="3.9.0">Jekyll</generator><link href="http://localhost:4000/feed.xml" rel="self" type="application/atom+xml" /><link href="http://localhost:4000/" rel="alternate" type="text/html" /><updated>2021-01-22T17:58:49+01:00</updated><id>http://localhost:4000/feed.xml</id><title type="html">Amperclock’s Blog</title><subtitle>Small blog about infosec, security tools developpement and howtos.</subtitle><entry><title type="html">Creating the blog with Jekyll</title><link href="http://localhost:4000/jekyll/creation/2021/01/22/creating-the-blog-with-Jekyll.html" rel="alternate" type="text/html" title="Creating the blog with Jekyll" /><published>2021-01-22T13:30:34+01:00</published><updated>2021-01-22T13:30:34+01:00</updated><id>http://localhost:4000/jekyll/creation/2021/01/22/creating-the-blog-with-Jekyll</id><content type="html" xml:base="http://localhost:4000/jekyll/creation/2021/01/22/creating-the-blog-with-Jekyll.html">&lt;p&gt;Sooo, this is the first post of this blog. In the future I’ll write about infosec, the development  of my personal tools and HOWTOS of a variety of subjects .The website is entirely written in markdown, built with Jekyll and hosted/served by GitHub.&lt;/p&gt;
 
 &lt;h2 id=&quot;1-why-choosing-jekyll-and-github-&quot;&gt;1) Why Choosing Jekyll and Github ?&lt;/h2&gt;
 &lt;p&gt;I wanted to create a blog for a long time to be able to share my findings/struggles/knowledge. Being familiar with markdown, I was looking for something that was able to serve MD pages, and that pretty easy to use. Since I just wanted to have a static website with a bunch of posts, Jekyll seamed like the perfect answer.&lt;/p&gt;
@@ -26,6 +26,8 @@
 &lt;h2 id=&quot;3-chaging-the-standard-theme&quot;&gt;3) Chaging the standard theme&lt;/h2&gt;
 &lt;p&gt;I was not a fan of the daymode of &lt;a href=&quot;https://github.com/jekyll/minima&quot;&gt;Minima&lt;/a&gt;, the standard theme that come with Jekyll (yes, I’m carrying about my eyeballs). I choose to keep the same layout, but wanted it dark. Luckily, this feature was added to the version 3.0 of &lt;a href=&quot;https://github.com/jekyll/minima&quot;&gt;Minima&lt;/a&gt;. The issue is that, at the time of writing, it has not been released. I’ll have to pull it directly from Github.&lt;/p&gt;
 
+&lt;p&gt;&lt;strong&gt;NOTE : GITHUB PAGES DOESN’T SUPPORT CUSTOM THEMES YET. THIS CONFIGURATION IS USELESS IF YOU USE GITHUB PAGES. TO HAVE THE DARKMODE, I NEED TO WAIT FOR THE OFFICIAL RELEASE OF THE VERSION 3.0 OF MINIMA&lt;/strong&gt;&lt;/p&gt;
+
 &lt;p&gt;First, let’s update the Minima’s version:&lt;/p&gt;
 
 &lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;vim Gemfile
@@ -33,7 +35,7 @@
 change  gem &lt;span class=&quot;s2&quot;&gt;&quot;minima&quot;&lt;/span&gt;, &lt;span class=&quot;s2&quot;&gt;&quot;~&amp;gt; 2.0&quot;&lt;/span&gt;
 to      gem &lt;span class=&quot;s2&quot;&gt;&quot;minima&quot;&lt;/span&gt;, github: &lt;span class=&quot;s2&quot;&gt;&quot;jekyll/minima&quot;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
 
-&lt;p&gt;Update the site :amperclock.github.io&lt;/p&gt;
+&lt;p&gt;Then, update the config of the website :&lt;/p&gt;
 
 &lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;vim _config.yml
 
@@ -47,10 +49,6 @@ I’m using the &lt;a href=&quot;https://docs.github.com/en/github/working-with-
 
 &lt;p&gt;I create a new repository for my website, with the name amperclock.github.io, according to the &lt;a href=&quot;https://docs.github.com/en/articles/about-github-pages#types-of-github-pages-sites&quot;&gt;Github Pages guidelines&lt;/a&gt;.
 &lt;img src=&quot;/assets/creating-repo.png&quot; alt=&quot;Creating the repo&quot; /&gt;&lt;/p&gt;
-
-&lt;p&gt;Now, in a terminal, let’s initialize the repo:&lt;/p&gt;
-
-&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;git init amperclock.github.io&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
 
 &lt;p&gt;Go to the the &lt;a href=&quot;https://pages.github.com/versions/&quot;&gt;GitHub Pages Dependency versions&lt;/a&gt; and grab the version for &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;github-pages&lt;/code&gt; (mine is 209) and &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;jekyll&lt;/code&gt; (mine is 3.9.0).&lt;/p&gt;
 
@@ -75,6 +73,25 @@ with VERSION being the version you grab before &lt;span class=&quot;o&quot;&gt;(
 
 &lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;bundle &lt;span class=&quot;nb&quot;&gt;exec &lt;/span&gt;jekyll serve&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
 
-&lt;p&gt;Now, I can track every Jekyll’s file, except the vendor :&lt;/p&gt;
+&lt;p&gt;Now, in a terminal, let’s initialize the repo:&lt;/p&gt;
 
-&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;git add &lt;span class=&quot;nt&quot;&gt;--&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;.&lt;/span&gt; &lt;span class=&quot;s1&quot;&gt;':!vendor'&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;</content><author><name></name></author><category term="jekyll" /><category term="Creation" /><summary type="html">Sooo, this is the first post of this blog. In the future I’ll write about infosec, the development of my personal tools and HOWTOS of a variety of subjects .The website is entirely written in markdown, built with Jekyll and hosted/served by GitHub.</summary></entry></feed>
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;git init amperclock.github.io&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+
+&lt;p&gt;Then track every Jekyll’s file, except the &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;vendor&lt;/code&gt; directory:&lt;/p&gt;
+
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;git add &lt;span class=&quot;nt&quot;&gt;--&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;.&lt;/span&gt; &lt;span class=&quot;s1&quot;&gt;':!vendor'&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+
+&lt;p&gt;Add the origin:&lt;/p&gt;
+
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;git remote add origin https://github.com/Amperclock/amperclock.github.io.git&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+
+&lt;p&gt;Then commit and push the modifications:&lt;/p&gt;
+
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;git commit &lt;span class=&quot;nt&quot;&gt;-m&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&quot;First commit&quot;&lt;/span&gt;
+git push&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+
+&lt;p&gt;If I need to change the parameters of the website, I can go on the repo, in the &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;Settings&lt;/code&gt; tab, and scroll down to the &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;GitHub Pages section&lt;/code&gt;&lt;/p&gt;
+
+&lt;h2 id=&quot;5-accessing-the-blog&quot;&gt;5) Accessing the blog&lt;/h2&gt;
+&lt;p&gt;The blog is now accessible at https://amperclock.github.io/. 
+NOTE : If you forced HTTPS in the settings, the website will obviously only be accessible in HTTPS.&lt;/p&gt;</content><author><name></name></author><category term="jekyll" /><category term="Creation" /><summary type="html">Sooo, this is the first post of this blog. In the future I’ll write about infosec, the development of my personal tools and HOWTOS of a variety of subjects .The website is entirely written in markdown, built with Jekyll and hosted/served by GitHub.</summary></entry></feed>

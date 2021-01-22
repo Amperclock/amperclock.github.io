@@ -28,7 +28,9 @@ Finally, once I'm in the directory, I can run the gem locally to serve the websi
 {% highlight bash %}bundle exec jekyll serve {% endhighlight %}
 
 ## 3) Chaging the standard theme
-I was not a fan of the daymode of [Minima], the standard theme that come with Jekyll (yes, I'm carrying about my eyeballs). I choose to keep the same layout, but wanted it dark. Luckily, this feature was added to the version 3.0 of [Minima]. The issue is that, at the time of writing, it has not been released. I'll have to pull it directly from Github. 
+I was not a fan of the daymode of [Minima], the standard theme that come with Jekyll (yes, I'm carrying about my eyeballs). I choose to keep the same layout, but wanted it dark. Luckily, this feature was added to the version 3.0 of [Minima]. The issue is that, at the time of writing, it has not been released. I'll have to pull it directly from Github.
+
+**NOTE : GITHUB PAGES DOESN'T SUPPORT CUSTOM THEMES YET. THIS CONFIGURATION IS USELESS IF YOU USE GITHUB PAGES. TO HAVE THE DARKMODE, I NEED TO WAIT FOR THE OFFICIAL RELEASE OF THE VERSION 3.0 OF MINIMA**
 
 First, let's update the Minima's version:
 {% highlight bash %}
@@ -38,7 +40,7 @@ change  gem "minima", "~> 2.0"
 to      gem "minima", github: "jekyll/minima"
 {% endhighlight %}
 
-Update the site :amperclock.github.io
+Then, update the config of the website :
 {% highlight bash %}
 vim _config.yml
 
@@ -54,11 +56,6 @@ I'm using the [Github Pages official documentation] to help me in the process.
 
 I create a new repository for my website, with the name amperclock.github.io, according to the [Github Pages guidelines].
 ![Creating the repo](/assets/creating-repo.png)
-
-Now, in a terminal, let's initialize the repo:
-{% highlight bash %}
-git init amperclock.github.io
-{% endhighlight %}
 
 Go to the the [GitHub Pages Dependency versions] and grab the version for `github-pages` (mine is 209) and `jekyll` (mine is 3.9.0).
 
@@ -81,10 +78,28 @@ Let's install the new versions:
 and test that everything still works:
 {% highlight bash %}bundle exec jekyll serve{% endhighlight %}
 
-Now, I can track every Jekyll's file, except the vendor :
+Now, in a terminal, let's initialize the repo:
+{% highlight bash %}
+git init amperclock.github.io
+{% endhighlight %}
+
+Then track every Jekyll's file, except the `vendor` directory:
 {% highlight bash %}git add -- . ':!vendor'{% endhighlight %}
 
+Add the origin:
+{% highlight bash %}git remote add origin https://github.com/Amperclock/amperclock.github.io.git{% endhighlight %}
 
+Then commit and push the modifications:
+{% highlight bash %}
+git commit -m "First commit"
+git push
+{% endhighlight %}
+
+If I need to change the parameters of the website, I can go on the repo, in the `Settings` tab, and scroll down to the `GitHub Pages section`
+
+## 5) Accessing the blog
+The blog is now accessible at https://amperclock.github.io/. 
+NOTE : If you forced HTTPS in the settings, the website will obviously only be accessible in HTTPS.
 
 [requirements]: https://jekyllrb.com/docs/installation/other-linux/
 [installation]: https://jekyllrb.com/docs/installation/ubuntu/

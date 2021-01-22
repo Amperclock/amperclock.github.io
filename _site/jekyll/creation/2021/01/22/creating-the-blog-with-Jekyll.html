@@ -74,6 +74,8 @@
 <h2 id="3-chaging-the-standard-theme">3) Chaging the standard theme</h2>
 <p>I was not a fan of the daymode of <a href="https://github.com/jekyll/minima">Minima</a>, the standard theme that come with Jekyll (yes, I’m carrying about my eyeballs). I choose to keep the same layout, but wanted it dark. Luckily, this feature was added to the version 3.0 of <a href="https://github.com/jekyll/minima">Minima</a>. The issue is that, at the time of writing, it has not been released. I’ll have to pull it directly from Github.</p>
 
+<p><strong>NOTE : GITHUB PAGES DOESN’T SUPPORT CUSTOM THEMES YET. THIS CONFIGURATION IS USELESS IF YOU USE GITHUB PAGES. TO HAVE THE DARKMODE, I NEED TO WAIT FOR THE OFFICIAL RELEASE OF THE VERSION 3.0 OF MINIMA</strong></p>
+
 <p>First, let’s update the Minima’s version:</p>
 
 <figure class="highlight"><pre><code class="language-bash" data-lang="bash">vim Gemfile
@@ -81,7 +83,7 @@
 change  gem <span class="s2">"minima"</span>, <span class="s2">"~&gt; 2.0"</span>
 to      gem <span class="s2">"minima"</span>, github: <span class="s2">"jekyll/minima"</span></code></pre></figure>
 
-<p>Update the site :amperclock.github.io</p>
+<p>Then, update the config of the website :</p>
 
 <figure class="highlight"><pre><code class="language-bash" data-lang="bash">vim _config.yml
 
@@ -95,10 +97,6 @@ I’m using the <a href="https://docs.github.com/en/github/working-with-github-p
 
 <p>I create a new repository for my website, with the name amperclock.github.io, according to the <a href="https://docs.github.com/en/articles/about-github-pages#types-of-github-pages-sites">Github Pages guidelines</a>.
 <img src="/assets/creating-repo.png" alt="Creating the repo" /></p>
-
-<p>Now, in a terminal, let’s initialize the repo:</p>
-
-<figure class="highlight"><pre><code class="language-bash" data-lang="bash">git init amperclock.github.io</code></pre></figure>
 
 <p>Go to the the <a href="https://pages.github.com/versions/">GitHub Pages Dependency versions</a> and grab the version for <code class="language-plaintext highlighter-rouge">github-pages</code> (mine is 209) and <code class="language-plaintext highlighter-rouge">jekyll</code> (mine is 3.9.0).</p>
 
@@ -123,9 +121,28 @@ with VERSION being the version you grab before <span class="o">(</span>mine is 2
 
 <figure class="highlight"><pre><code class="language-bash" data-lang="bash">bundle <span class="nb">exec </span>jekyll serve</code></pre></figure>
 
-<p>Now, I can track every Jekyll’s file, except the vendor :</p>
+<p>Now, in a terminal, let’s initialize the repo:</p>
+
+<figure class="highlight"><pre><code class="language-bash" data-lang="bash">git init amperclock.github.io</code></pre></figure>
+
+<p>Then track every Jekyll’s file, except the <code class="language-plaintext highlighter-rouge">vendor</code> directory:</p>
 
 <figure class="highlight"><pre><code class="language-bash" data-lang="bash">git add <span class="nt">--</span> <span class="nb">.</span> <span class="s1">':!vendor'</span></code></pre></figure>
+
+<p>Add the origin:</p>
+
+<figure class="highlight"><pre><code class="language-bash" data-lang="bash">git remote add origin https://github.com/Amperclock/amperclock.github.io.git</code></pre></figure>
+
+<p>Then commit and push the modifications:</p>
+
+<figure class="highlight"><pre><code class="language-bash" data-lang="bash">git commit <span class="nt">-m</span> <span class="s2">"First commit"</span>
+git push</code></pre></figure>
+
+<p>If I need to change the parameters of the website, I can go on the repo, in the <code class="language-plaintext highlighter-rouge">Settings</code> tab, and scroll down to the <code class="language-plaintext highlighter-rouge">GitHub Pages section</code></p>
+
+<h2 id="5-accessing-the-blog">5) Accessing the blog</h2>
+<p>The blog is now accessible at https://amperclock.github.io/. 
+NOTE : If you forced HTTPS in the settings, the website will obviously only be accessible in HTTPS.</p>
 
 
   </div><a class="u-url" href="/jekyll/creation/2021/01/22/creating-the-blog-with-Jekyll.html" hidden></a>

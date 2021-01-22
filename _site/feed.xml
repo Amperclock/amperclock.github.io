@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="3.9.0">Jekyll</generator><link href="http://localhost:4000/feed.xml" rel="self" type="application/atom+xml" /><link href="http://localhost:4000/" rel="alternate" type="text/html" /><updated>2021-01-22T17:18:10+01:00</updated><id>http://localhost:4000/feed.xml</id><title type="html">Amperclock’s Blog</title><subtitle>Small blog about infosec, security tools developpement and howtos.</subtitle><entry><title type="html">Creating the blog with Jekyll</title><link href="http://localhost:4000/jekyll/creation/2021/01/22/creating-the-blog-with-Jekyll.html" rel="alternate" type="text/html" title="Creating the blog with Jekyll" /><published>2021-01-22T13:30:34+01:00</published><updated>2021-01-22T13:30:34+01:00</updated><id>http://localhost:4000/jekyll/creation/2021/01/22/creating-the-blog-with-Jekyll</id><content type="html" xml:base="http://localhost:4000/jekyll/creation/2021/01/22/creating-the-blog-with-Jekyll.html">&lt;p&gt;Sooo, this is the first post of this blog. In the future I’ll write about infosec, the development  of my personal tools and HOWTOS of a variety of subjects .The website is entirely written in markdown, built with Jekyll and hosted/served by GitHub.&lt;/p&gt;
+
+&lt;h2 id=&quot;1-why-choosing-jekyll-and-github-&quot;&gt;1) Why Choosing Jekyll and Github ?&lt;/h2&gt;
+&lt;p&gt;I wanted to create a blog for a long time to be able to share my findings/struggles/knowledge. Being familiar with markdown, I was looking for something that was able to serve MD pages, and that pretty easy to use. Since I just wanted to have a static website with a bunch of posts, Jekyll seamed like the perfect answer.&lt;/p&gt;
+
+&lt;p&gt;To remove the hassle of administrating and renting a web server, I searched and founded out that GitHub was able to serve Jekyll pages, free of charge, with all the benefits that came with it (redundancy/versioning/…).&lt;/p&gt;
+
+&lt;h2 id=&quot;2-installing-jekyll-locally&quot;&gt;2) Installing Jekyll locally&lt;/h2&gt;
+&lt;p&gt;I’m currently working on Debian 10 (Buster), so I’ll install the &lt;a href=&quot;https://jekyllrb.com/docs/installation/other-linux/&quot;&gt;requirements&lt;/a&gt; :&lt;/p&gt;
+
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;&lt;span class=&quot;nb&quot;&gt;sudo &lt;/span&gt;apt update &lt;span class=&quot;o&quot;&gt;&amp;amp;&amp;amp;&lt;/span&gt; apt &lt;span class=&quot;nb&quot;&gt;install &lt;/span&gt;ruby-full build-essential &lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+
+&lt;p&gt;Once the requirements are installed, I can proceed with the &lt;a href=&quot;https://jekyllrb.com/docs/installation/ubuntu/&quot;&gt;installation&lt;/a&gt; Jekyll :&lt;/p&gt;
+
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;gem &lt;span class=&quot;nb&quot;&gt;install &lt;/span&gt;jekyll bundler &lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+
+&lt;p&gt;Then create the website in the current directory :&lt;/p&gt;
+
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;jekyll new amperclock.github.io
+&lt;span class=&quot;nb&quot;&gt;cd &lt;/span&gt;amperclock.github.io&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+
+&lt;p&gt;Finally, once I’m in the directory, I can run the gem locally to serve the website:&lt;/p&gt;
+
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;bundle &lt;span class=&quot;nb&quot;&gt;exec &lt;/span&gt;jekyll serve &lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+
+&lt;h2 id=&quot;3-chaging-the-standard-theme&quot;&gt;3) Chaging the standard theme&lt;/h2&gt;
+&lt;p&gt;I was not a fan of the daymode of &lt;a href=&quot;https://github.com/jekyll/minima&quot;&gt;Minima&lt;/a&gt;, the standard theme that come with Jekyll (yes, I’m carrying about my eyeballs). I choose to keep the same layout, but wanted it dark. Luckily, this feature was added to the version 3.0 of &lt;a href=&quot;https://github.com/jekyll/minima&quot;&gt;Minima&lt;/a&gt;. The issue is that, at the time of writing, it has not been released. I’ll have to pull it directly from Github.&lt;/p&gt;
+
+&lt;p&gt;First, let’s update the Minima’s version:&lt;/p&gt;
+
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;vim Gemfile
+
+change  gem &lt;span class=&quot;s2&quot;&gt;&quot;minima&quot;&lt;/span&gt;, &lt;span class=&quot;s2&quot;&gt;&quot;~&amp;gt; 2.0&quot;&lt;/span&gt;
+to      gem &lt;span class=&quot;s2&quot;&gt;&quot;minima&quot;&lt;/span&gt;, git: &lt;span class=&quot;s2&quot;&gt;&quot;https://github.com/jekyll/minima&quot;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+
+&lt;p&gt;Update the site :&lt;/p&gt;
+
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;bundle update &lt;span class=&quot;o&quot;&gt;&amp;amp;&amp;amp;&lt;/span&gt; bundle &lt;span class=&quot;nb&quot;&gt;install&lt;/span&gt; &lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+
+&lt;p&gt;And configure the dark theme in the &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;_config.yml&lt;/code&gt; file :&lt;/p&gt;
+
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;vim _config.yml
+
+after   theme: minima
+add     minima: 
+            skin: dark&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+
+&lt;h2 id=&quot;4-hosting-the-blog-on-github&quot;&gt;4) Hosting the blog on Github&lt;/h2&gt;
+&lt;p&gt;Now that I’ve tested Jekyll locally, I’m ready to host it on Github to make it available on the web.
+I’m using the &lt;a href=&quot;https://docs.github.com/en/github/working-with-github-pages/creating-a-github-pages-site-with-jekyll&quot;&gt;Github Pages official documentation&lt;/a&gt; to help me in the process.&lt;/p&gt;
+
+&lt;p&gt;I create a new repository for my website, with the name amperclock.github.io, according to the &lt;a href=&quot;https://docs.github.com/en/articles/about-github-pages#types-of-github-pages-sites&quot;&gt;Github Pages guidelines&lt;/a&gt;.
+&lt;img src=&quot;/assets/creating-repo.png&quot; alt=&quot;Creating the repo&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;Now, in a terminal, let’s initialize the repo:&lt;/p&gt;
+
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;git init amperclock.github.io&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+
+&lt;p&gt;Go to the the &lt;a href=&quot;https://pages.github.com/versions/&quot;&gt;GitHub Pages Dependency versions&lt;/a&gt; and grab the version for &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;github-pages&lt;/code&gt; (mine is 209) and &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;jekyll&lt;/code&gt; (mine is 3.9.0).&lt;/p&gt;
+
+&lt;p&gt;Make a few modifications to the Gemfile:&lt;/p&gt;
+
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;&lt;span class=&quot;nb&quot;&gt;cd &lt;/span&gt;amperclock.github.io
+vim Gemfile
+
+change the line gem &lt;span class=&quot;s2&quot;&gt;&quot;jekyll&quot;&lt;/span&gt;, &lt;span class=&quot;s2&quot;&gt;&quot;~&amp;gt; 3.8.3&quot;&lt;/span&gt;
+to              gem &lt;span class=&quot;s2&quot;&gt;&quot;jekyll&quot;&lt;/span&gt;, &lt;span class=&quot;s2&quot;&gt;&quot;~&amp;gt; VERSION&quot;&lt;/span&gt;
+with VERSION being the version you grab before &lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;mine is 3.9.0&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt;
+
+under the line  &lt;span class=&quot;c&quot;&gt;# gem &quot;github-pages&quot;, group: :jekyll_plugins&lt;/span&gt;
+add             gem &lt;span class=&quot;s2&quot;&gt;&quot;github-pages&quot;&lt;/span&gt;, &lt;span class=&quot;s2&quot;&gt;&quot;~&amp;gt; VERSION&quot;&lt;/span&gt;, group: :jekyll_plugins
+with VERSION being the version you grab before &lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;mine is 209&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+
+&lt;p&gt;Let’s install the new versions:&lt;/p&gt;
+
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;bundle update &lt;span class=&quot;o&quot;&gt;&amp;amp;&amp;amp;&lt;/span&gt; bundle &lt;span class=&quot;nb&quot;&gt;install&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+
+&lt;p&gt;and test that everything still works:&lt;/p&gt;
+
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;bundle &lt;span class=&quot;nb&quot;&gt;exec &lt;/span&gt;jekyll serve&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;</content><author><name></name></author><category term="jekyll" /><category term="Creation" /><summary type="html">Sooo, this is the first post of this blog. In the future I’ll write about infosec, the development of my personal tools and HOWTOS of a variety of subjects .The website is entirely written in markdown, built with Jekyll and hosted/served by GitHub.</summary></entry></feed>

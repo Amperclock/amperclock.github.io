@@ -79,13 +79,9 @@
 <figure class="highlight"><pre><code class="language-bash" data-lang="bash">vim Gemfile
 
 change  gem <span class="s2">"minima"</span>, <span class="s2">"~&gt; 2.0"</span>
-to      gem <span class="s2">"minima"</span>, git: <span class="s2">"https://github.com/jekyll/minima"</span></code></pre></figure>
+to      gem <span class="s2">"minima"</span>, github: <span class="s2">"jekyll/minima"</span></code></pre></figure>
 
-<p>Update the site :</p>
-
-<figure class="highlight"><pre><code class="language-bash" data-lang="bash">bundle update <span class="o">&amp;&amp;</span> bundle <span class="nb">install</span> </code></pre></figure>
-
-<p>And configure the dark theme in the <code class="language-plaintext highlighter-rouge">_config.yml</code> file :</p>
+<p>Update the site :amperclock.github.io</p>
 
 <figure class="highlight"><pre><code class="language-bash" data-lang="bash">vim _config.yml
 
@@ -126,6 +122,10 @@ with VERSION being the version you grab before <span class="o">(</span>mine is 2
 <p>and test that everything still works:</p>
 
 <figure class="highlight"><pre><code class="language-bash" data-lang="bash">bundle <span class="nb">exec </span>jekyll serve</code></pre></figure>
+
+<p>Now, I can track every Jekyll’s file, except the vendor :</p>
+
+<figure class="highlight"><pre><code class="language-bash" data-lang="bash">git add <span class="nt">--</span> <span class="nb">.</span> <span class="s1">':!vendor'</span></code></pre></figure>
 
 
   </div><a class="u-url" href="/jekyll/creation/2021/01/22/creating-the-blog-with-Jekyll.html" hidden></a>

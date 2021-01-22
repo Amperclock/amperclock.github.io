@@ -35,13 +35,10 @@ First, let's update the Minima's version:
 vim Gemfile
 
 change  gem "minima", "~> 2.0"
-to      gem "minima", git: "https://github.com/jekyll/minima"
+to      gem "minima", github: "jekyll/minima"
 {% endhighlight %}
 
-Update the site :
-{% highlight bash %}bundle update && bundle install {% endhighlight %}
-
-And configure the dark theme in the `_config.yml` file :
+Update the site :amperclock.github.io
 {% highlight bash %}
 vim _config.yml
 
@@ -83,6 +80,10 @@ Let's install the new versions:
 {% highlight bash %}bundle update && bundle install{% endhighlight %}
 and test that everything still works:
 {% highlight bash %}bundle exec jekyll serve{% endhighlight %}
+
+Now, I can track every Jekyll's file, except the vendor :
+{% highlight bash %}git add -- . ':!vendor'{% endhighlight %}
+
 
 
 [requirements]: https://jekyllrb.com/docs/installation/other-linux/

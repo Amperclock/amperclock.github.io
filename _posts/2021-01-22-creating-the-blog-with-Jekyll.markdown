@@ -2,7 +2,8 @@
 layout: post
 title:  "Creating the blog with Jekyll and GitHub Pages"
 date:   2021-01-22 13:30:34 +0100
-categories: jekyll creation how to
+categories: howto
+tags: jekyll creation how to
 ---
 
 ![banner](/assets/jekyllXgithub_banner.png)

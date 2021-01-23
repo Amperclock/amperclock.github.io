@@ -1,4 +1,221 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="3.9.0">Jekyll</generator><link href="http://localhost:4000/feed.xml" rel="self" type="application/atom+xml" /><link href="http://localhost:4000/" rel="alternate" type="text/html" /><updated>2021-01-22T17:58:49+01:00</updated><id>http://localhost:4000/feed.xml</id><title type="html">Amperclock’s Blog</title><subtitle>Small blog about infosec, security tools developpement and howtos.</subtitle><entry><title type="html">Creating the blog with Jekyll</title><link href="http://localhost:4000/jekyll/creation/2021/01/22/creating-the-blog-with-Jekyll.html" rel="alternate" type="text/html" title="Creating the blog with Jekyll" /><published>2021-01-22T13:30:34+01:00</published><updated>2021-01-22T13:30:34+01:00</updated><id>http://localhost:4000/jekyll/creation/2021/01/22/creating-the-blog-with-Jekyll</id><content type="html" xml:base="http://localhost:4000/jekyll/creation/2021/01/22/creating-the-blog-with-Jekyll.html">&lt;p&gt;Sooo, this is the first post of this blog. In the future I’ll write about infosec, the development  of my personal tools and HOWTOS of a variety of subjects .The website is entirely written in markdown, built with Jekyll and hosted/served by GitHub.&lt;/p&gt;
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="3.9.0">Jekyll</generator><link href="http://localhost:4000/feed.xml" rel="self" type="application/atom+xml" /><link href="http://localhost:4000/" rel="alternate" type="text/html" /><updated>2021-01-23T20:56:48+01:00</updated><id>http://localhost:4000/feed.xml</id><title type="html">Amperclock’s Blog</title><subtitle>Small blog about infosec, security tools developpement and howtos.</subtitle><entry><title type="html">Creating a seedbox and a NAS with a RaspberryPi</title><link href="http://localhost:4000/howto/2021/01/23/creating-NAS-seedbox-raspberry-pi.html" rel="alternate" type="text/html" title="Creating a seedbox and a NAS with a RaspberryPi" /><published>2021-01-23T11:00:00+01:00</published><updated>2021-01-23T11:00:00+01:00</updated><id>http://localhost:4000/howto/2021/01/23/creating-NAS-seedbox-raspberry-pi</id><content type="html" xml:base="http://localhost:4000/howto/2021/01/23/creating-NAS-seedbox-raspberry-pi.html">&lt;p&gt;&lt;img src=&quot;/assets/raspberry-seedbox_banner.png&quot; alt=&quot;banner&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;In this post, we’ll see how to create a seedbox for your torrents, and how to create a samba network share to make them available to your local network. Torrents needs users in order to work properly: if no one is seeding the file, you can’t download it. So it’s a good practice to seed during a certain period of time the file that you just downloaded, especially when there’s only a few seeders.&lt;/p&gt;
+
+&lt;p&gt;A seedbox is a server that is dedicated to download and share files via a Peer-to-peer (P2P) network. Additionally, it should have a way to recover those downloaded files (in our case, the samba network share). This server is always on, which means that we don’t need to remember to seed the files we just downloaded for the rest of the community, the seedbox will take care of it.&lt;/p&gt;
+
+&lt;p&gt;We will also see&lt;/p&gt;
+
+&lt;h2 id=&quot;1-necessary-material&quot;&gt;1) Necessary material&lt;/h2&gt;
+&lt;ul&gt;
+  &lt;li&gt;A Raspberry pi (I’ll use a 3, but a 4 is strongly recommended)&lt;/li&gt;
+  &lt;li&gt;An SD Card of at least 4GB&lt;/li&gt;
+  &lt;li&gt;A USB HDD (any size will do, but keep in mind that your downloaded files will end up on it)&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;For this project, a Raspberry pi 4 is way better then the 3. Although it comes with greater processing power, what really interest us is the better IO:&lt;/p&gt;
+
+&lt;table&gt;
+  &lt;thead&gt;
+    &lt;tr&gt;
+      &lt;th&gt;Raspberry&lt;/th&gt;
+      &lt;th style=&quot;text-align: center&quot;&gt;USB&lt;/th&gt;
+      &lt;th style=&quot;text-align: center&quot;&gt;Network&lt;/th&gt;
+    &lt;/tr&gt;
+  &lt;/thead&gt;
+  &lt;tbody&gt;
+    &lt;tr&gt;
+      &lt;td&gt;Version 3&lt;/td&gt;
+      &lt;td style=&quot;text-align: center&quot;&gt;2.0&lt;/td&gt;
+      &lt;td style=&quot;text-align: center&quot;&gt;100 Mbps&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td&gt;Version 4&lt;/td&gt;
+      &lt;td style=&quot;text-align: center&quot;&gt;3.0&lt;/td&gt;
+      &lt;td style=&quot;text-align: center&quot;&gt;1 Gps&lt;/td&gt;
+    &lt;/tr&gt;
+  &lt;/tbody&gt;
+&lt;/table&gt;
+
+&lt;p&gt;If you have a optic fiber connection, using a 4 over a 3 will allow you to pass from 12,5 MB/s to 128 MB/s (theoretical). You can find more informations about the technical specifications on the raspberry &lt;a href=&quot;https://www.raspberrypi.org/products/raspberry-pi-3-model-b/&quot;&gt;3&lt;/a&gt; and &lt;a href=&quot;https://www.raspberrypi.org/products/raspberry-pi-4-model-b/specifications/&quot;&gt;4&lt;/a&gt; product pages.&lt;/p&gt;
+
+&lt;h2 id=&quot;2-installing-raspberry-pi-os-raspbian&quot;&gt;2) Installing Raspberry Pi OS (Raspbian)&lt;/h2&gt;
+
+&lt;p&gt;Let’s start by downloading the Raspberry pi OS (previously called Raspbian): 
+Go to the &lt;a href=&quot;https://www.raspberrypi.org/software/operating-systems/&quot;&gt;download page&lt;/a&gt; and choose the Raspberry Pi OS &lt;strong&gt;Lite&lt;/strong&gt;. We don’t need any graphical interface or any tools with a GUI for this project.&lt;/p&gt;
+
+&lt;p&gt;Once downloaded, burn it on the SD card:&lt;/p&gt;
+
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;dd &lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;bs&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;4M &lt;span class=&quot;k&quot;&gt;if&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;2021-01-11-raspios-buster-armhf.img &lt;span class=&quot;nv&quot;&gt;of&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;/dev/sdX &lt;span class=&quot;nv&quot;&gt;conv&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;fsync&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+
+&lt;p&gt;Insert the SD card into the Raspberry, connect a screen with HDMI, and power it up by connecting the USB power cable. Once the startup sequence is finished, you are invited to log in. Use the default credentials :&lt;/p&gt;
+
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;user    pi
+pass    raspberry&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+
+&lt;p&gt;Use the rapsberry utility to change your keyboard layout (if needed) and enter your Wifi settings (more informations about the raspi-config &lt;a href=&quot;https://www.raspberrypi.org/documentation/configuration/raspi-config.md&quot;&gt;here&lt;/a&gt;):&lt;/p&gt;
+
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;raspi-config&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+
+&lt;p&gt;For security reasons, change the defaults passwords:&lt;/p&gt;
+
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;su   &lt;span class=&quot;c&quot;&gt;# Change user to root &lt;/span&gt;
+ &lt;span class=&quot;c&quot;&gt;#Enter the password of the pi user (rapberry)&lt;/span&gt;
+&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;passwd    &lt;span class=&quot;c&quot;&gt;#To change the root password&lt;/span&gt;
+&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;passwd pi &lt;span class=&quot;c&quot;&gt;#to change the pi user password&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+
+&lt;p&gt;Don’t forget to make sure that all your packages are up to date, and install any pending updates:&lt;/p&gt;
+
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;apt update &lt;span class=&quot;o&quot;&gt;&amp;amp;&amp;amp;&lt;/span&gt; apt upgrade&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+
+&lt;h2 id=&quot;3-configure-and-enable-ssh-server&quot;&gt;3) Configure and enable SSH server&lt;/h2&gt;
+&lt;p&gt;An SSH server comes preinstalled on the version Lite of RaspberryPiOS. We’ll add a bit of configuration:&lt;/p&gt;
+
+&lt;p&gt;Disable root login (for security reasons):&lt;/p&gt;
+
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;vim /etc/ssh/ssh_config
+add     PermitRootLogin No&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+
+&lt;p&gt;Then, enable the ssh service (previously named sshd) to have it started at boot:&lt;/p&gt;
+
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;systemctl &lt;span class=&quot;nb&quot;&gt;enable &lt;/span&gt;ssh
+&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;systemctl status ssh &lt;span class=&quot;c&quot;&gt;#check it status&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+
+&lt;h2 id=&quot;4-storage&quot;&gt;4) Storage&lt;/h2&gt;
+&lt;p&gt;We can create the directory that transmission will use to store the files:&lt;/p&gt;
+
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;mkdir&lt;/span&gt; /mnt/drive&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+
+&lt;p&gt;don’t forget to add the proper rights so the daemon can write in it:&lt;/p&gt;
+
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;chown &lt;/span&gt;debian-transmission /mnt/drive
+&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;chgrp &lt;/span&gt;debian-transmission /mnt/drive
+&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;chmod&lt;/span&gt; &lt;span class=&quot;nt&quot;&gt;-R&lt;/span&gt; 755 /mnt/drive&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+
+&lt;p&gt;To simplify everything, we can edit fstab file to auto mount the USB disk on boot. First, let’s get the UUID of the drive (to have more infos about the UUID, you can look at &lt;a href=&quot;https://wiki.debian.org/Part-UUID#Via_UUIDs&quot;&gt;this wiki page&lt;/a&gt;).&lt;/p&gt;
+
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;lsblk &lt;span class=&quot;nt&quot;&gt;-f&lt;/span&gt;
+&lt;span class=&quot;c&quot;&gt;#Find your USB disk, and write down the UUID&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+
+&lt;p&gt;Now, we need to edit the fstab to add our drive. At the end of the file, add a line according to this table:&lt;/p&gt;
+
+&lt;table&gt;
+  &lt;thead&gt;
+    &lt;tr&gt;
+      &lt;th&gt;Option&lt;/th&gt;
+      &lt;th&gt;UUID&lt;/th&gt;
+      &lt;th&gt;Mount point&lt;/th&gt;
+      &lt;th&gt;Filesystem&lt;/th&gt;
+      &lt;th&gt;Options&lt;/th&gt;
+      &lt;th&gt;Dump&lt;/th&gt;
+      &lt;th&gt;Pass&lt;/th&gt;
+    &lt;/tr&gt;
+  &lt;/thead&gt;
+  &lt;tbody&gt;
+    &lt;tr&gt;
+      &lt;td&gt;Explanations&lt;/td&gt;
+      &lt;td&gt;The UUID of your drive&lt;/td&gt;
+      &lt;td&gt;The directory to mount the filesystem&lt;/td&gt;
+      &lt;td&gt;The filesystem type&lt;/td&gt;
+      &lt;td&gt;Leave it to default&lt;/td&gt;
+      &lt;td&gt;Leave 0&lt;/td&gt;
+      &lt;td&gt;Leave 2&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td&gt;Example&lt;/td&gt;
+      &lt;td&gt;[MYUUID]&lt;/td&gt;
+      &lt;td&gt;/mnt/drive&lt;/td&gt;
+      &lt;td&gt;ext4&lt;/td&gt;
+      &lt;td&gt;Defaults&lt;/td&gt;
+      &lt;td&gt;O&lt;/td&gt;
+      &lt;td&gt; &lt;/td&gt;
+    &lt;/tr&gt;
+  &lt;/tbody&gt;
+&lt;/table&gt;
+
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;vim /etc/fstab
+&lt;span class=&quot;c&quot;&gt;# Add your line according to the previous table, save and quit&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+
+&lt;p&gt;For a comprehensive explanation on every fstab options, visit &lt;a href=&quot;https://wiki.debian.org/fstab&quot;&gt;the wiki&lt;/a&gt;&lt;/p&gt;
+
+&lt;h2 id=&quot;5-install-and-configure-transmission-daemon&quot;&gt;5) Install and configure transmission-daemon:&lt;/h2&gt;
+
+&lt;p&gt;Install the daemon with &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;apt&lt;/code&gt;:&lt;/p&gt;
+
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;apt &lt;span class=&quot;nb&quot;&gt;install &lt;/span&gt;transmission-daemon&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+
+&lt;p&gt;And stop it:&lt;/p&gt;
+
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;systemctl stop transmission-deamon&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+
+&lt;p&gt;Once it’s stopped, we can start editing the json config file:&lt;/p&gt;
+
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;vim /etc/transmission-daemon/settings.json
+Change download-dir     : /mnt/drive
+Change incomplete-dir   : /mnt/drive/
+Change rpc-whitelist    : add &lt;span class=&quot;k&quot;&gt;*&lt;/span&gt;
+Change rpc-username     : &lt;span class=&quot;s2&quot;&gt;&quot;user&quot;&lt;/span&gt; &lt;span class=&quot;c&quot;&gt;#Or what ever you want it to be&lt;/span&gt;
+Change rpc-password     : &lt;span class=&quot;s2&quot;&gt;&quot;yourpassword&quot;&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;in &lt;/span&gt;plain text &lt;span class=&quot;c&quot;&gt;#Will be encrypted on restart&lt;/span&gt;
+Change rpc-url          : /transmission/&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+
+&lt;p&gt;All infos about every parameters are available here on the &lt;a href=&quot;https://github.com/transmission/transmission/wiki/Editing-Configuration-Files&quot;&gt;git&lt;/a&gt;.&lt;/p&gt;
+
+&lt;p&gt;Now we can restart the daemon and enable it:&lt;/p&gt;
+
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;systemctl restart transmission-daemon
+&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;systemctl &lt;span class=&quot;nb&quot;&gt;enable &lt;/span&gt;transmission-daemon&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+
+&lt;p&gt;We can now access the RPC
+URL : http://raspberryIP:9091/transmission/web/&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;NOTE:&lt;/strong&gt; When the download is completed, you &lt;strong&gt;need&lt;/strong&gt; to manually Pause it and Restart it in order to start seeding.&lt;/p&gt;
+
+&lt;h2 id=&quot;6-create-the-network-share&quot;&gt;6) Create the network share&lt;/h2&gt;
+&lt;p&gt;Install samba:&lt;/p&gt;
+
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;apt &lt;span class=&quot;nb&quot;&gt;install &lt;/span&gt;samba&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+
+&lt;p&gt;Then, create a user for authentication when accessing the share.
+&lt;strong&gt;NOTE:&lt;/strong&gt; You can skip this operation if, like me, you prefer to use the “pi” user.&lt;/p&gt;
+
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;useradd myuser
+&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;passwd myuser&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+
+&lt;p&gt;Don’t forget to add the user to the &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;debian-transmission&lt;/code&gt; group:&lt;/p&gt;
+
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;usermod &lt;span class=&quot;nt&quot;&gt;-a&lt;/span&gt; &lt;span class=&quot;nt&quot;&gt;-G&lt;/span&gt; debian-transmission myuser&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+
+&lt;p&gt;Now, we can add the user to the smbpasswd file to use if for authentication:&lt;/p&gt;
+
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;smbpasswd &lt;span class=&quot;nt&quot;&gt;-a&lt;/span&gt; myuser
+&lt;span class=&quot;c&quot;&gt;#Specify the same password, or an other one.&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+
+&lt;p&gt;We can edit the Samba config file in order to add our directory to share:&lt;/p&gt;
+
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;vim /etc/samba/smb.conf
+&lt;span class=&quot;c&quot;&gt;#At the end of the file, add&lt;/span&gt;
+&lt;span class=&quot;o&quot;&gt;[&lt;/span&gt;shared]
+comment &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; My fabulous torrent collection
+path &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; /mnt/drive
+public &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;yes
+&lt;/span&gt;writable &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; no
+&lt;span class=&quot;nb&quot;&gt;read &lt;/span&gt;only &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;yes
+&lt;/span&gt;guest ok &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;yes&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+
+&lt;p&gt;&lt;strong&gt;NOTE:&lt;/strong&gt; This configuration is to allow anyone (user anonymous) to read the share, but not to write in it. You can find more informations into the  &lt;a href=&quot;https://www.samba.org/samba/docs/current/man-html/smb.conf.5.html&quot;&gt;smb.conf documentation&lt;/a&gt;&lt;/p&gt;
+
+&lt;h2 id=&quot;7-install-and-configure-openvpn&quot;&gt;7) Install and configure openvpn&lt;/h2&gt;
+&lt;p&gt;At this point, you already have a working seedbox, with a network share to access your downloaded files. We can take it a step further by configuring a VPN client.&lt;/p&gt;
+
+&lt;p&gt;Start by installing openvpn:&lt;/p&gt;
+
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;apt &lt;span class=&quot;nb&quot;&gt;install &lt;/span&gt;openvpn&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+
+&lt;p&gt;Once installed, grab the .ovpn that your vpn provider gave you (in my case nordvpn), and start openvpn with it&lt;/p&gt;
+
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;openvpn file.ovpn&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;</content><author><name></name></author><category term="howto" /><category term="NAS" /><category term="Raspberry" /><category term="Pi" /><category term="Seedbox" /><category term="Creation" /><category term="torrent" /><category term="vpn" /><category term="openvpn" /><summary type="html"></summary></entry><entry><title type="html">Creating the blog with Jekyll and GitHub Pages</title><link href="http://localhost:4000/howto/2021/01/22/creating-the-blog-with-Jekyll.html" rel="alternate" type="text/html" title="Creating the blog with Jekyll and GitHub Pages" /><published>2021-01-22T13:30:34+01:00</published><updated>2021-01-22T13:30:34+01:00</updated><id>http://localhost:4000/howto/2021/01/22/creating-the-blog-with-Jekyll</id><content type="html" xml:base="http://localhost:4000/howto/2021/01/22/creating-the-blog-with-Jekyll.html">&lt;p&gt;&lt;img src=&quot;/assets/jekyllXgithub_banner.png&quot; alt=&quot;banner&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;Sooo, let’s talk about how I created this blog. By the way, this the first post of my blog. In the future I’ll write about infosec, the development  of my personal tools and HOWTOS of a variety of subjects .The website is entirely written in markdown, built with Jekyll and hosted/served by GitHub.&lt;/p&gt;
 
 &lt;h2 id=&quot;1-why-choosing-jekyll-and-github-&quot;&gt;1) Why Choosing Jekyll and Github ?&lt;/h2&gt;
 &lt;p&gt;I wanted to create a blog for a long time to be able to share my findings/struggles/knowledge. Being familiar with markdown, I was looking for something that was able to serve MD pages, and that pretty easy to use. Since I just wanted to have a static website with a bunch of posts, Jekyll seamed like the perfect answer.&lt;/p&gt;
@@ -14,7 +231,7 @@
 
 &lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;gem &lt;span class=&quot;nb&quot;&gt;install &lt;/span&gt;jekyll bundler &lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
 
-&lt;p&gt;Then create the website in the current directory :&lt;/p&gt;
+&lt;p&gt;Then I create the website in the current directory :&lt;/p&gt;
 
 &lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;jekyll new amperclock.github.io
 &lt;span class=&quot;nb&quot;&gt;cd &lt;/span&gt;amperclock.github.io&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
@@ -23,7 +240,7 @@
 
 &lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;bundle &lt;span class=&quot;nb&quot;&gt;exec &lt;/span&gt;jekyll serve &lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
 
-&lt;h2 id=&quot;3-chaging-the-standard-theme&quot;&gt;3) Chaging the standard theme&lt;/h2&gt;
+&lt;h2 id=&quot;3-changing-the-standard-theme&quot;&gt;3) Changing the standard theme&lt;/h2&gt;
 &lt;p&gt;I was not a fan of the daymode of &lt;a href=&quot;https://github.com/jekyll/minima&quot;&gt;Minima&lt;/a&gt;, the standard theme that come with Jekyll (yes, I’m carrying about my eyeballs). I choose to keep the same layout, but wanted it dark. Luckily, this feature was added to the version 3.0 of &lt;a href=&quot;https://github.com/jekyll/minima&quot;&gt;Minima&lt;/a&gt;. The issue is that, at the time of writing, it has not been released. I’ll have to pull it directly from Github.&lt;/p&gt;
 
 &lt;p&gt;&lt;strong&gt;NOTE : GITHUB PAGES DOESN’T SUPPORT CUSTOM THEMES YET. THIS CONFIGURATION IS USELESS IF YOU USE GITHUB PAGES. TO HAVE THE DARKMODE, I NEED TO WAIT FOR THE OFFICIAL RELEASE OF THE VERSION 3.0 OF MINIMA&lt;/strong&gt;&lt;/p&gt;
@@ -35,7 +252,7 @@
 change  gem &lt;span class=&quot;s2&quot;&gt;&quot;minima&quot;&lt;/span&gt;, &lt;span class=&quot;s2&quot;&gt;&quot;~&amp;gt; 2.0&quot;&lt;/span&gt;
 to      gem &lt;span class=&quot;s2&quot;&gt;&quot;minima&quot;&lt;/span&gt;, github: &lt;span class=&quot;s2&quot;&gt;&quot;jekyll/minima&quot;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
 
-&lt;p&gt;Then, update the config of the website :&lt;/p&gt;
+&lt;p&gt;Then, update the _config of the website :&lt;/p&gt;
 
 &lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;vim _config.yml
 
@@ -44,28 +261,28 @@ add     minima:
             skin: dark&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
 
 &lt;h2 id=&quot;4-hosting-the-blog-on-github&quot;&gt;4) Hosting the blog on Github&lt;/h2&gt;
-&lt;p&gt;Now that I’ve tested Jekyll locally, I’m ready to host it on Github to make it available on the web.
+&lt;p&gt;Now that I’ve tested Jekyll locally, I’m ready to host it on Github to make it available to the internet.
 I’m using the &lt;a href=&quot;https://docs.github.com/en/github/working-with-github-pages/creating-a-github-pages-site-with-jekyll&quot;&gt;Github Pages official documentation&lt;/a&gt; to help me in the process.&lt;/p&gt;
 
 &lt;p&gt;I create a new repository for my website, with the name amperclock.github.io, according to the &lt;a href=&quot;https://docs.github.com/en/articles/about-github-pages#types-of-github-pages-sites&quot;&gt;Github Pages guidelines&lt;/a&gt;.
 &lt;img src=&quot;/assets/creating-repo.png&quot; alt=&quot;Creating the repo&quot; /&gt;&lt;/p&gt;
 
-&lt;p&gt;Go to the the &lt;a href=&quot;https://pages.github.com/versions/&quot;&gt;GitHub Pages Dependency versions&lt;/a&gt; and grab the version for &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;github-pages&lt;/code&gt; (mine is 209) and &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;jekyll&lt;/code&gt; (mine is 3.9.0).&lt;/p&gt;
+&lt;p&gt;Now I go to the the &lt;a href=&quot;https://pages.github.com/versions/&quot;&gt;GitHub Pages Dependency versions&lt;/a&gt; and grab the version for &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;github-pages&lt;/code&gt; (mine is 209) and &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;jekyll&lt;/code&gt; (mine is 3.9.0).&lt;/p&gt;
 
-&lt;p&gt;Make a few modifications to the Gemfile:&lt;/p&gt;
+&lt;p&gt;I maje a few modifications to the Gemfile in order to have matching versions:&lt;/p&gt;
 
 &lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;&lt;span class=&quot;nb&quot;&gt;cd &lt;/span&gt;amperclock.github.io
 vim Gemfile
 
 change the line gem &lt;span class=&quot;s2&quot;&gt;&quot;jekyll&quot;&lt;/span&gt;, &lt;span class=&quot;s2&quot;&gt;&quot;~&amp;gt; 3.8.3&quot;&lt;/span&gt;
 to              gem &lt;span class=&quot;s2&quot;&gt;&quot;jekyll&quot;&lt;/span&gt;, &lt;span class=&quot;s2&quot;&gt;&quot;~&amp;gt; VERSION&quot;&lt;/span&gt;
-with VERSION being the version you grab before &lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;mine is 3.9.0&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt;
+with VERSION being the version you grabed before &lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;mine is 3.9.0&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt;
 
 under the line  &lt;span class=&quot;c&quot;&gt;# gem &quot;github-pages&quot;, group: :jekyll_plugins&lt;/span&gt;
 add             gem &lt;span class=&quot;s2&quot;&gt;&quot;github-pages&quot;&lt;/span&gt;, &lt;span class=&quot;s2&quot;&gt;&quot;~&amp;gt; VERSION&quot;&lt;/span&gt;, group: :jekyll_plugins
-with VERSION being the version you grab before &lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;mine is 209&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+with VERSION being the version you grabed before &lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;mine is 209&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
 
-&lt;p&gt;Let’s install the new versions:&lt;/p&gt;
+&lt;p&gt;Let’s install locally the new versions:&lt;/p&gt;
 
 &lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;bundle update &lt;span class=&quot;o&quot;&gt;&amp;amp;&amp;amp;&lt;/span&gt; bundle &lt;span class=&quot;nb&quot;&gt;install&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
 
@@ -73,7 +290,7 @@ with VERSION being the version you grab before &lt;span class=&quot;o&quot;&gt;(
 
 &lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;bundle &lt;span class=&quot;nb&quot;&gt;exec &lt;/span&gt;jekyll serve&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
 
-&lt;p&gt;Now, in a terminal, let’s initialize the repo:&lt;/p&gt;
+&lt;p&gt;In a terminal, let’s initialize the repo:&lt;/p&gt;
 
 &lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;git init amperclock.github.io&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
 
@@ -81,7 +298,7 @@ with VERSION being the version you grab before &lt;span class=&quot;o&quot;&gt;(
 
 &lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;git add &lt;span class=&quot;nt&quot;&gt;--&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;.&lt;/span&gt; &lt;span class=&quot;s1&quot;&gt;':!vendor'&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
 
-&lt;p&gt;Add the origin:&lt;/p&gt;
+&lt;p&gt;I Add the origin:&lt;/p&gt;
 
 &lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;git remote add origin https://github.com/Amperclock/amperclock.github.io.git&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
 
@@ -94,4 +311,4 @@ git push&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
 
 &lt;h2 id=&quot;5-accessing-the-blog&quot;&gt;5) Accessing the blog&lt;/h2&gt;
 &lt;p&gt;The blog is now accessible at https://amperclock.github.io/. 
-NOTE : If you forced HTTPS in the settings, the website will obviously only be accessible in HTTPS.&lt;/p&gt;</content><author><name></name></author><category term="jekyll" /><category term="Creation" /><summary type="html">Sooo, this is the first post of this blog. In the future I’ll write about infosec, the development of my personal tools and HOWTOS of a variety of subjects .The website is entirely written in markdown, built with Jekyll and hosted/served by GitHub.</summary></entry></feed>
+NOTE : If you forced HTTPS in the settings, the website will obviously only be accessible in HTTPS.&lt;/p&gt;</content><author><name></name></author><category term="howto" /><category term="jekyll" /><category term="creation" /><category term="how" /><category term="to" /><summary type="html"></summary></entry></feed>

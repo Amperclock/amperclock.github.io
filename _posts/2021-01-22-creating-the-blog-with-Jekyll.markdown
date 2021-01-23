@@ -4,6 +4,9 @@ title:  "Creating the blog with Jekyll and GitHub Pages"
 date:   2021-01-22 13:30:34 +0100
 categories: jekyll creation how to
 ---
+
+![banner](/assets/jekyllXgithub_banner.png)
+
 Sooo, let's talk about how I created this blog. By the way, this the first post of my blog. In the future I'll write about infosec, the development  of my personal tools and HOWTOS of a variety of subjects .The website is entirely written in markdown, built with Jekyll and hosted/served by GitHub. 
 
 ## 1) Why Choosing Jekyll and Github ?

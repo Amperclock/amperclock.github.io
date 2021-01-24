@@ -259,9 +259,52 @@ public <span class="o">=</span> <span class="nb">yes
 
 <figure class="highlight"><pre><code class="language-bash" data-lang="bash"><span class="nv">$ </span>apt <span class="nb">install </span>openvpn</code></pre></figure>
 
-<p>Once installed, grab the .ovpn that your vpn provider gave you (in my case nordvpn), and start openvpn with it</p>
+<p>Once installed, grab the .ovpn that your vpn provider gave you (in my case <a href="https://nordvpn.com/fr/ovpn/">nordvpn</a>), and start openvpn with it</p>
 
 <figure class="highlight"><pre><code class="language-bash" data-lang="bash"><span class="nv">$ </span>openvpn file.ovpn</code></pre></figure>
+
+<p>Don’t forget to make sure that the route is correctly added:</p>
+
+<figure class="highlight"><pre><code class="language-bash" data-lang="bash"><span class="nv">$ </span>ip route
+<span class="c">#0.0.0.0/1 via 10.7.0.1 dev tun0 </span></code></pre></figure>
+
+<p>To make is more convenient, we’ll configure Openvpn to automatically start the VPN tunnel at boot. According to this <a href="https://openvpn.net/community-resources/configuring-openvpn-to-run-automatically-on-system-startup/">openvpn’s documentation</a>:
+When openvpn is installed from <em>“DEB package on Linux, the installer will set up an initscript. When executed, the initscript will scan for .conf configuration files in /etc/openvpn, and if found, will start up a separate OpenVPN daemon for each file.”</em></p>
+
+<p>Edit the openvpn configuration file:</p>
+
+<figure class="highlight"><pre><code class="language-bash" data-lang="bash"><span class="nv">$ </span>/etc/default/openvpn
+<span class="c">#Uncomment the line AUTOSTART="all"</span></code></pre></figure>
+
+<p>Copy your .ovpn file into the openvpn’s directory:</p>
+
+<figure class="highlight"><pre><code class="language-bash" data-lang="bash"><span class="nv">$ </span><span class="nb">cp</span> /where/ever/is/you/file.ovpn /etc/openvpn
+<span class="c">#And change the name of it to client.conf</span>
+<span class="nv">$ </span><span class="nb">mv</span> /etc/openvpn/yourfile.ovpn /etc/openvpn/client.conf</code></pre></figure>
+
+<p>This step is only if you need to enter your credentials when connecting to the vpn server:</p>
+
+<figure class="highlight"><pre><code class="language-bash" data-lang="bash"><span class="nv">$ </span>vim /etc/openvpn/yourfile.conf
+<span class="c">#Add ".creds" at the end of the line auth-user-pass</span>
+<span class="c">#Save and quit</span>
+<span class="nv">$ </span>vim /etc/openvpn/.creds
+<span class="c">#Write the username on the first line</span>
+<span class="c">#and the password on the second line</span>
+<span class="c">#Save and quit</span>
+<span class="nv">$ </span><span class="nb">chmod </span>400 .creds
+<span class="c">#To only allow root to read the file</span></code></pre></figure>
+
+<p>Enable openvpn to have it started on boot:</p>
+
+<figure class="highlight"><pre><code class="language-bash" data-lang="bash">systemctl <span class="nb">enable </span>openvpn</code></pre></figure>
+
+<p>And set a delay before the transmission-daemon starts (in order for the VPN tunnel to be turned on):</p>
+
+<figure class="highlight"><pre><code class="language-bash" data-lang="bash"><span class="nv">$ </span>vim /etc/systemd/system/multi-user.target.wants
+<span class="c">#After the [Service], add :</span>
+<span class="nv">ExecStartPre</span><span class="o">=</span>/bin/sleep 30</code></pre></figure>
+
+<p>At this point the seedbox is ready. Just restart the Raspberry Pi and check that you can access to the web interface.</p>
 
 
   </div><a class="u-url" href="/howto/2021/01/23/creating-NAS-seedbox-raspberry-pi.html" hidden></a>

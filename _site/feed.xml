@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="3.9.0">Jekyll</generator><link href="http://localhost:4000/feed.xml" rel="self" type="application/atom+xml" /><link href="http://localhost:4000/" rel="alternate" type="text/html" /><updated>2021-01-23T20:56:48+01:00</updated><id>http://localhost:4000/feed.xml</id><title type="html">Amperclock’s Blog</title><subtitle>Small blog about infosec, security tools developpement and howtos.</subtitle><entry><title type="html">Creating a seedbox and a NAS with a RaspberryPi</title><link href="http://localhost:4000/howto/2021/01/23/creating-NAS-seedbox-raspberry-pi.html" rel="alternate" type="text/html" title="Creating a seedbox and a NAS with a RaspberryPi" /><published>2021-01-23T11:00:00+01:00</published><updated>2021-01-23T11:00:00+01:00</updated><id>http://localhost:4000/howto/2021/01/23/creating-NAS-seedbox-raspberry-pi</id><content type="html" xml:base="http://localhost:4000/howto/2021/01/23/creating-NAS-seedbox-raspberry-pi.html">&lt;p&gt;&lt;img src=&quot;/assets/raspberry-seedbox_banner.png&quot; alt=&quot;banner&quot; /&gt;&lt;/p&gt;
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="3.9.0">Jekyll</generator><link href="http://localhost:4000/feed.xml" rel="self" type="application/atom+xml" /><link href="http://localhost:4000/" rel="alternate" type="text/html" /><updated>2021-01-24T18:42:13+01:00</updated><id>http://localhost:4000/feed.xml</id><title type="html">Amperclock’s Blog</title><subtitle>Small blog about infosec, security tools developpement and howtos.</subtitle><entry><title type="html">Creating a seedbox and a NAS with a RaspberryPi</title><link href="http://localhost:4000/howto/2021/01/23/creating-NAS-seedbox-raspberry-pi.html" rel="alternate" type="text/html" title="Creating a seedbox and a NAS with a RaspberryPi" /><published>2021-01-23T11:00:00+01:00</published><updated>2021-01-23T11:00:00+01:00</updated><id>http://localhost:4000/howto/2021/01/23/creating-NAS-seedbox-raspberry-pi</id><content type="html" xml:base="http://localhost:4000/howto/2021/01/23/creating-NAS-seedbox-raspberry-pi.html">&lt;p&gt;&lt;img src=&quot;/assets/raspberry-seedbox_banner.png&quot; alt=&quot;banner&quot; /&gt;&lt;/p&gt;
 
 &lt;p&gt;In this post, we’ll see how to create a seedbox for your torrents, and how to create a samba network share to make them available to your local network. Torrents needs users in order to work properly: if no one is seeding the file, you can’t download it. So it’s a good practice to seed during a certain period of time the file that you just downloaded, especially when there’s only a few seeders.&lt;/p&gt;
 
@@ -211,9 +211,52 @@ public &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nb&qu
 
 &lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;apt &lt;span class=&quot;nb&quot;&gt;install &lt;/span&gt;openvpn&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
 
-&lt;p&gt;Once installed, grab the .ovpn that your vpn provider gave you (in my case nordvpn), and start openvpn with it&lt;/p&gt;
+&lt;p&gt;Once installed, grab the .ovpn that your vpn provider gave you (in my case &lt;a href=&quot;https://nordvpn.com/fr/ovpn/&quot;&gt;nordvpn&lt;/a&gt;), and start openvpn with it&lt;/p&gt;
 
-&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;openvpn file.ovpn&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;</content><author><name></name></author><category term="howto" /><category term="NAS" /><category term="Raspberry" /><category term="Pi" /><category term="Seedbox" /><category term="Creation" /><category term="torrent" /><category term="vpn" /><category term="openvpn" /><summary type="html"></summary></entry><entry><title type="html">Creating the blog with Jekyll and GitHub Pages</title><link href="http://localhost:4000/howto/2021/01/22/creating-the-blog-with-Jekyll.html" rel="alternate" type="text/html" title="Creating the blog with Jekyll and GitHub Pages" /><published>2021-01-22T13:30:34+01:00</published><updated>2021-01-22T13:30:34+01:00</updated><id>http://localhost:4000/howto/2021/01/22/creating-the-blog-with-Jekyll</id><content type="html" xml:base="http://localhost:4000/howto/2021/01/22/creating-the-blog-with-Jekyll.html">&lt;p&gt;&lt;img src=&quot;/assets/jekyllXgithub_banner.png&quot; alt=&quot;banner&quot; /&gt;&lt;/p&gt;
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;openvpn file.ovpn&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+
+&lt;p&gt;Don’t forget to make sure that the route is correctly added:&lt;/p&gt;
+
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;ip route
+&lt;span class=&quot;c&quot;&gt;#0.0.0.0/1 via 10.7.0.1 dev tun0 &lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+
+&lt;p&gt;To make is more convenient, we’ll configure Openvpn to automatically start the VPN tunnel at boot. According to this &lt;a href=&quot;https://openvpn.net/community-resources/configuring-openvpn-to-run-automatically-on-system-startup/&quot;&gt;openvpn’s documentation&lt;/a&gt;:
+When openvpn is installed from &lt;em&gt;“DEB package on Linux, the installer will set up an initscript. When executed, the initscript will scan for .conf configuration files in /etc/openvpn, and if found, will start up a separate OpenVPN daemon for each file.”&lt;/em&gt;&lt;/p&gt;
+
+&lt;p&gt;Edit the openvpn configuration file:&lt;/p&gt;
+
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;/etc/default/openvpn
+&lt;span class=&quot;c&quot;&gt;#Uncomment the line AUTOSTART=&quot;all&quot;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+
+&lt;p&gt;Copy your .ovpn file into the openvpn’s directory:&lt;/p&gt;
+
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;cp&lt;/span&gt; /where/ever/is/you/file.ovpn /etc/openvpn
+&lt;span class=&quot;c&quot;&gt;#And change the name of it to client.conf&lt;/span&gt;
+&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;mv&lt;/span&gt; /etc/openvpn/yourfile.ovpn /etc/openvpn/client.conf&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+
+&lt;p&gt;This step is only if you need to enter your credentials when connecting to the vpn server:&lt;/p&gt;
+
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;vim /etc/openvpn/yourfile.conf
+&lt;span class=&quot;c&quot;&gt;#Add &quot;.creds&quot; at the end of the line auth-user-pass&lt;/span&gt;
+&lt;span class=&quot;c&quot;&gt;#Save and quit&lt;/span&gt;
+&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;vim /etc/openvpn/.creds
+&lt;span class=&quot;c&quot;&gt;#Write the username on the first line&lt;/span&gt;
+&lt;span class=&quot;c&quot;&gt;#and the password on the second line&lt;/span&gt;
+&lt;span class=&quot;c&quot;&gt;#Save and quit&lt;/span&gt;
+&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;chmod &lt;/span&gt;400 .creds
+&lt;span class=&quot;c&quot;&gt;#To only allow root to read the file&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+
+&lt;p&gt;Enable openvpn to have it started on boot:&lt;/p&gt;
+
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;systemctl &lt;span class=&quot;nb&quot;&gt;enable &lt;/span&gt;openvpn&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+
+&lt;p&gt;And set a delay before the transmission-daemon starts (in order for the VPN tunnel to be turned on):&lt;/p&gt;
+
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;vim /etc/systemd/system/multi-user.target.wants
+&lt;span class=&quot;c&quot;&gt;#After the [Service], add :&lt;/span&gt;
+&lt;span class=&quot;nv&quot;&gt;ExecStartPre&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;/bin/sleep 30&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+
+&lt;p&gt;At this point the seedbox is ready. Just restart the Raspberry Pi and check that you can access to the web interface.&lt;/p&gt;</content><author><name></name></author><category term="howto" /><category term="NAS" /><category term="Raspberry" /><category term="Pi" /><category term="Seedbox" /><category term="Creation" /><category term="torrent" /><category term="vpn" /><category term="openvpn" /><summary type="html"></summary></entry><entry><title type="html">Creating the blog with Jekyll and GitHub Pages</title><link href="http://localhost:4000/howto/2021/01/22/creating-the-blog-with-Jekyll.html" rel="alternate" type="text/html" title="Creating the blog with Jekyll and GitHub Pages" /><published>2021-01-22T13:30:34+01:00</published><updated>2021-01-22T13:30:34+01:00</updated><id>http://localhost:4000/howto/2021/01/22/creating-the-blog-with-Jekyll</id><content type="html" xml:base="http://localhost:4000/howto/2021/01/22/creating-the-blog-with-Jekyll.html">&lt;p&gt;&lt;img src=&quot;/assets/jekyllXgithub_banner.png&quot; alt=&quot;banner&quot; /&gt;&lt;/p&gt;
 
 &lt;p&gt;Sooo, let’s talk about how I created this blog. By the way, this the first post of my blog. In the future I’ll write about infosec, the development  of my personal tools and HOWTOS of a variety of subjects .The website is entirely written in markdown, built with Jekyll and hosted/served by GitHub.&lt;/p&gt;
 

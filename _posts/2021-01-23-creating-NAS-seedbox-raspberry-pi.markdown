@@ -200,9 +200,60 @@ Start by installing openvpn:
 $ apt install openvpn
 {% endhighlight %}
 
-Once installed, grab the .ovpn that your vpn provider gave you (in my case nordvpn), and start openvpn with it
+Once installed, grab the .ovpn that your vpn provider gave you (in my case [nordvpn]), and start openvpn with it
 {% highlight bash %}
 $ openvpn file.ovpn
 {% endhighlight %}
+
+Don't forget to make sure that the route is correctly added:
+{% highlight bash %}
+$ ip route
+#0.0.0.0/1 via 10.7.0.1 dev tun0 
+{% endhighlight %}
+
+To make is more convenient, we'll configure Openvpn to automatically start the VPN tunnel at boot. According to this [openvpn's documentation]:
+When openvpn is installed from *"DEB package on Linux, the installer will set up an initscript. When executed, the initscript will scan for .conf configuration files in /etc/openvpn, and if found, will start up a separate OpenVPN daemon for each file."*
+
+Edit the openvpn configuration file:
+{% highlight bash %}
+$ /etc/default/openvpn
+#Uncomment the line AUTOSTART="all"
+{% endhighlight %}
+
+Copy your .ovpn file into the openvpn's directory:
+{% highlight bash %}
+$ cp /where/ever/is/you/file.ovpn /etc/openvpn
+#And change the name of it to client.conf
+$ mv /etc/openvpn/yourfile.ovpn /etc/openvpn/client.conf
+{% endhighlight %}
+
+This step is only if you need to enter your credentials when connecting to the vpn server:
+{% highlight bash %}
+$ vim /etc/openvpn/yourfile.conf
+#Add ".creds" at the end of the line auth-user-pass
+#Save and quit
+$ vim /etc/openvpn/.creds
+#Write the username on the first line
+#and the password on the second line
+#Save and quit
+$ chmod 400 .creds
+#To only allow root to read the file
+{% endhighlight %}
+
+Enable openvpn to have it started on boot:
+{% highlight bash %}
+systemctl enable openvpn
+{% endhighlight %}
+
+And set a delay before the transmission-daemon starts (in order for the VPN tunnel to be turned on):
+{% highlight bash %}
+$ vim /etc/systemd/system/multi-user.target.wants
+#After the [Service], add :
+ExecStartPre=/bin/sleep 30
+{% endhighlight %}
+
+At this point the seedbox is ready. Just restart the Raspberry Pi and check that you can access to the web interface.  
+
+[openvpn's documentation]: https://openvpn.net/community-resources/configuring-openvpn-to-run-automatically-on-system-startup/
 
 [nordvpn]: https://nordvpn.com/fr/ovpn/

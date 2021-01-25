@@ -66,6 +66,11 @@ Don't forget to make sure that all your packages are up to date, and install any
 $ apt update && apt upgrade
 {% endhighlight %}
 
+Change your hostname in order to better identify the pi on your network:
+{% highlight bash %}
+$ hostnamectl set-hostname seedbox
+{% endhighlight %}
+
 [download page]: https://www.raspberrypi.org/software/operating-systems/
 [here]: https://www.raspberrypi.org/documentation/configuration/raspi-config.md
 
@@ -81,14 +86,47 @@ add     PermitRootLogin No
 Then, enable the ssh service (previously named sshd) to have it started at boot:
 {% highlight bash %}
 $ systemctl enable ssh
-$ systemctl status ssh #check it status
+$ systemctl start ssh
 {% endhighlight %}
 
-## 4) Storage
+## 4) Install and configure transmission-daemon:
+
+Install the daemon with `apt`:
+{% highlight bash %}apt install transmission-daemon{% endhighlight %}
+
+And stop it:
+{% highlight bash %}systemctl stop transmission-deamon{% endhighlight %}
+
+Once it's stopped, we can start editing the json config file:
+{% highlight bash %}
+$ vim /etc/transmission-daemon/settings.json
+Change download-dir     : /mnt/drive
+Change incomplete-dir   : /mnt/drive/
+Change rpc-whitelist    : change "127.0.0.1" to "*"
+Change rpc-username     : "user" #Or what ever you want it to be
+Change rpc-password     : "yourpassword" in plain text #Will be encrypted on restart
+Change rpc-url          : /transmission/
+
+{% endhighlight %}
+All infos about every parameters are available here on the [git].
+
 We can create the directory that transmission will use to store the files:
 {% highlight bash %}$ mkdir /mnt/drive{% endhighlight %}
 
-don't forget to add the proper rights so the daemon can write in it:
+Now we can restart the daemon and enable it:
+{% highlight bash %}
+$ systemctl restart transmission-daemon
+$ systemctl enable transmission-daemon
+{% endhighlight %}
+
+We can now access the RPC
+URL : http://raspberryIP:9091/transmission/web/
+
+[git]: https://github.com/transmission/transmission/wiki/Editing-Configuration-Files
+
+## 5) Storage
+
+Let's add the proper rights so the daemon can write in it:
 {% highlight bash %}
 $ chown debian-transmission /mnt/drive
 $ chgrp debian-transmission /mnt/drive
@@ -105,8 +143,8 @@ Now, we need to edit the fstab to add our drive. At the end of the file, add a l
 
 | Option | UUID | Mount point | Filesystem | Options | Dump | Pass |
 |--------||------|-------------|------|---------|------|------|
-|Explanations| The UUID of your drive|The directory to mount the filesystem|The filesystem type|Leave it to default|Leave 0| Leave 2|
-|Example| [MYUUID]| /mnt/drive| ext4 | Defaults | O |
+|Explanations| The UUID of your drive|The directory to mount the filesystem|The filesystem type|Leave it to "defaults"|Leave 0| Leave 2|
+|Example| UUID=[MYUUID]| /mnt/drive| ext4 | defaults | 0 | 2 |
 
 {% highlight bash %}
 $ vim /etc/fstab
@@ -118,61 +156,13 @@ For a comprehensive explanation on every fstab options, visit [the wiki]
 [this wiki page]: https://wiki.debian.org/Part-UUID#Via_UUIDs
 [the wiki]: https://wiki.debian.org/fstab
 
-## 5) Install and configure transmission-daemon:
-
-Install the daemon with `apt`:
-{% highlight bash %}apt install transmission-daemon{% endhighlight %}
-
-And stop it:
-{% highlight bash %}systemctl stop transmission-deamon{% endhighlight %}
-
-Once it's stopped, we can start editing the json config file:
-{% highlight bash %}
-$ vim /etc/transmission-daemon/settings.json
-Change download-dir     : /mnt/drive
-Change incomplete-dir   : /mnt/drive/
-Change rpc-whitelist    : add *
-Change rpc-username     : "user" #Or what ever you want it to be
-Change rpc-password     : "yourpassword" in plain text #Will be encrypted on restart
-Change rpc-url          : /transmission/
-
-{% endhighlight %}
-All infos about every parameters are available here on the [git].
-
-Now we can restart the daemon and enable it:
-{% highlight bash %}
-$ systemctl restart transmission-daemon
-$ systemctl enable transmission-daemon
-{% endhighlight %}
-
-We can now access the RPC
-URL : http://raspberryIP:9091/transmission/web/
-
-**NOTE:** When the download is completed, you **need** to manually Pause it and Restart it in order to start seeding.
-
-[git]: https://github.com/transmission/transmission/wiki/Editing-Configuration-Files
-
-
 ## 6) Create the network share
+
+**NOTE:** This configuration is to allow anyone (user anonymous) to read the share, but not to write in it. You can find more informations into the  [smb.conf documentation]
+
 Install samba:
 {% highlight bash %}
 $ apt install samba
-{% endhighlight %}
-
-Then, create a user for authentication when accessing the share.
-**NOTE:** You can skip this operation if, like me, you prefer to use the "pi" user.
-{% highlight bash %}
-$ useradd myuser
-$ passwd myuser
-{% endhighlight %}
-
-Don't forget to add the user to the `debian-transmission` group:
-{% highlight bash %}usermod -a -G debian-transmission myuser{% endhighlight %}
-
-Now, we can add the user to the smbpasswd file to use if for authentication:
-{% highlight bash %}
-$ smbpasswd -a myuser
-#Specify the same password, or an other one.
 {% endhighlight %}
 
 We can edit the Samba config file in order to add our directory to share:
@@ -188,7 +178,10 @@ read only = yes
 guest ok = yes
 {% endhighlight %}
 
-**NOTE:** This configuration is to allow anyone (user anonymous) to read the share, but not to write in it. You can find more informations into the  [smb.conf documentation]
+Restart samba to take into account the modifications we just did:
+{% highlight bash %}
+$ systemctl restart smbd
+{% endhighlight %}
 
 [smb.conf documentation]: https://www.samba.org/samba/docs/current/man-html/smb.conf.5.html
 
@@ -229,8 +222,8 @@ $ mv /etc/openvpn/yourfile.ovpn /etc/openvpn/client.conf
 
 This step is only if you need to enter your credentials when connecting to the vpn server:
 {% highlight bash %}
-$ vim /etc/openvpn/yourfile.conf
-#Add ".creds" at the end of the line auth-user-pass
+$ vim /etc/openvpn/client.conf
+#Add " .creds" at the end of the line auth-user-pass
 #Save and quit
 $ vim /etc/openvpn/.creds
 #Write the username on the first line
@@ -247,13 +240,15 @@ systemctl enable openvpn
 
 And set a delay before the transmission-daemon starts (in order for the VPN tunnel to be turned on):
 {% highlight bash %}
-$ vim /etc/systemd/system/multi-user.target.wants
+$ vim /etc/systemd/system/multi-user.target.wants/transmission-daemon.service
 #After the [Service], add :
 ExecStartPre=/bin/sleep 30
 {% endhighlight %}
 
+To take it a step further, you can implement a killswitch in the event that the VPN connection is terminated. Just follow [this tutorial].
+
 At this point the seedbox is ready. Just restart the Raspberry Pi and check that you can access to the web interface.  
 
 [openvpn's documentation]: https://openvpn.net/community-resources/configuring-openvpn-to-run-automatically-on-system-startup/
-
 [nordvpn]: https://nordvpn.com/fr/ovpn/
+[this tutorial]: https://linuxconfig.org/how-to-create-a-vpn-killswitch-using-iptables-on-linux

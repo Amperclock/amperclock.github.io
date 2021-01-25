@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="3.9.0">Jekyll</generator><link href="http://localhost:4000/feed.xml" rel="self" type="application/atom+xml" /><link href="http://localhost:4000/" rel="alternate" type="text/html" /><updated>2021-01-24T18:42:13+01:00</updated><id>http://localhost:4000/feed.xml</id><title type="html">Amperclock’s Blog</title><subtitle>Small blog about infosec, security tools developpement and howtos.</subtitle><entry><title type="html">Creating a seedbox and a NAS with a RaspberryPi</title><link href="http://localhost:4000/howto/2021/01/23/creating-NAS-seedbox-raspberry-pi.html" rel="alternate" type="text/html" title="Creating a seedbox and a NAS with a RaspberryPi" /><published>2021-01-23T11:00:00+01:00</published><updated>2021-01-23T11:00:00+01:00</updated><id>http://localhost:4000/howto/2021/01/23/creating-NAS-seedbox-raspberry-pi</id><content type="html" xml:base="http://localhost:4000/howto/2021/01/23/creating-NAS-seedbox-raspberry-pi.html">&lt;p&gt;&lt;img src=&quot;/assets/raspberry-seedbox_banner.png&quot; alt=&quot;banner&quot; /&gt;&lt;/p&gt;
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="3.9.0">Jekyll</generator><link href="http://localhost:4000/feed.xml" rel="self" type="application/atom+xml" /><link href="http://localhost:4000/" rel="alternate" type="text/html" /><updated>2021-01-25T22:35:28+01:00</updated><id>http://localhost:4000/feed.xml</id><title type="html">Amperclock’s Blog</title><subtitle>Small blog about infosec, security tools developpement and howtos.</subtitle><entry><title type="html">Creating a seedbox and a NAS with a RaspberryPi</title><link href="http://localhost:4000/howto/2021/01/23/creating-NAS-seedbox-raspberry-pi.html" rel="alternate" type="text/html" title="Creating a seedbox and a NAS with a RaspberryPi" /><published>2021-01-23T11:00:00+01:00</published><updated>2021-01-23T11:00:00+01:00</updated><id>http://localhost:4000/howto/2021/01/23/creating-NAS-seedbox-raspberry-pi</id><content type="html" xml:base="http://localhost:4000/howto/2021/01/23/creating-NAS-seedbox-raspberry-pi.html">&lt;p&gt;&lt;img src=&quot;/assets/raspberry-seedbox_banner.png&quot; alt=&quot;banner&quot; /&gt;&lt;/p&gt;
 
 &lt;p&gt;In this post, we’ll see how to create a seedbox for your torrents, and how to create a samba network share to make them available to your local network. Torrents needs users in order to work properly: if no one is seeding the file, you can’t download it. So it’s a good practice to seed during a certain period of time the file that you just downloaded, especially when there’s only a few seeders.&lt;/p&gt;
 
@@ -68,6 +68,10 @@ pass    raspberry&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
 
 &lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;apt update &lt;span class=&quot;o&quot;&gt;&amp;amp;&amp;amp;&lt;/span&gt; apt upgrade&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
 
+&lt;p&gt;Change your hostname in order to better identify the pi on your network:&lt;/p&gt;
+
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;hostnamectl set-hostname seedbox&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+
 &lt;h2 id=&quot;3-configure-and-enable-ssh-server&quot;&gt;3) Configure and enable SSH server&lt;/h2&gt;
 &lt;p&gt;An SSH server comes preinstalled on the version Lite of RaspberryPiOS. We’ll add a bit of configuration:&lt;/p&gt;
 
@@ -79,14 +83,45 @@ add     PermitRootLogin No&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
 &lt;p&gt;Then, enable the ssh service (previously named sshd) to have it started at boot:&lt;/p&gt;
 
 &lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;systemctl &lt;span class=&quot;nb&quot;&gt;enable &lt;/span&gt;ssh
-&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;systemctl status ssh &lt;span class=&quot;c&quot;&gt;#check it status&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;systemctl start ssh&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
 
-&lt;h2 id=&quot;4-storage&quot;&gt;4) Storage&lt;/h2&gt;
+&lt;h2 id=&quot;4-install-and-configure-transmission-daemon&quot;&gt;4) Install and configure transmission-daemon:&lt;/h2&gt;
+
+&lt;p&gt;Install the daemon with &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;apt&lt;/code&gt;:&lt;/p&gt;
+
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;apt &lt;span class=&quot;nb&quot;&gt;install &lt;/span&gt;transmission-daemon&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+
+&lt;p&gt;And stop it:&lt;/p&gt;
+
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;systemctl stop transmission-deamon&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+
+&lt;p&gt;Once it’s stopped, we can start editing the json config file:&lt;/p&gt;
+
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;vim /etc/transmission-daemon/settings.json
+Change download-dir     : /mnt/drive
+Change incomplete-dir   : /mnt/drive/
+Change rpc-whitelist    : change &lt;span class=&quot;s2&quot;&gt;&quot;127.0.0.1&quot;&lt;/span&gt; to &lt;span class=&quot;s2&quot;&gt;&quot;*&quot;&lt;/span&gt;
+Change rpc-username     : &lt;span class=&quot;s2&quot;&gt;&quot;user&quot;&lt;/span&gt; &lt;span class=&quot;c&quot;&gt;#Or what ever you want it to be&lt;/span&gt;
+Change rpc-password     : &lt;span class=&quot;s2&quot;&gt;&quot;yourpassword&quot;&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;in &lt;/span&gt;plain text &lt;span class=&quot;c&quot;&gt;#Will be encrypted on restart&lt;/span&gt;
+Change rpc-url          : /transmission/&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+
+&lt;p&gt;All infos about every parameters are available here on the &lt;a href=&quot;https://github.com/transmission/transmission/wiki/Editing-Configuration-Files&quot;&gt;git&lt;/a&gt;.&lt;/p&gt;
+
 &lt;p&gt;We can create the directory that transmission will use to store the files:&lt;/p&gt;
 
 &lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;mkdir&lt;/span&gt; /mnt/drive&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
 
-&lt;p&gt;don’t forget to add the proper rights so the daemon can write in it:&lt;/p&gt;
+&lt;p&gt;Now we can restart the daemon and enable it:&lt;/p&gt;
+
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;systemctl restart transmission-daemon
+&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;systemctl &lt;span class=&quot;nb&quot;&gt;enable &lt;/span&gt;transmission-daemon&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+
+&lt;p&gt;We can now access the RPC
+URL : http://raspberryIP:9091/transmission/web/&lt;/p&gt;
+
+&lt;h2 id=&quot;5-storage&quot;&gt;5) Storage&lt;/h2&gt;
+
+&lt;p&gt;Let’s add the proper rights so the daemon can write in it:&lt;/p&gt;
 
 &lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;chown &lt;/span&gt;debian-transmission /mnt/drive
 &lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;chgrp &lt;/span&gt;debian-transmission /mnt/drive
@@ -117,18 +152,18 @@ add     PermitRootLogin No&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
       &lt;td&gt;The UUID of your drive&lt;/td&gt;
       &lt;td&gt;The directory to mount the filesystem&lt;/td&gt;
       &lt;td&gt;The filesystem type&lt;/td&gt;
-      &lt;td&gt;Leave it to default&lt;/td&gt;
+      &lt;td&gt;Leave it to “defaults”&lt;/td&gt;
       &lt;td&gt;Leave 0&lt;/td&gt;
       &lt;td&gt;Leave 2&lt;/td&gt;
     &lt;/tr&gt;
     &lt;tr&gt;
       &lt;td&gt;Example&lt;/td&gt;
-      &lt;td&gt;[MYUUID]&lt;/td&gt;
+      &lt;td&gt;UUID=[MYUUID]&lt;/td&gt;
       &lt;td&gt;/mnt/drive&lt;/td&gt;
       &lt;td&gt;ext4&lt;/td&gt;
-      &lt;td&gt;Defaults&lt;/td&gt;
-      &lt;td&gt;O&lt;/td&gt;
-      &lt;td&gt; &lt;/td&gt;
+      &lt;td&gt;defaults&lt;/td&gt;
+      &lt;td&gt;0&lt;/td&gt;
+      &lt;td&gt;2&lt;/td&gt;
     &lt;/tr&gt;
   &lt;/tbody&gt;
 &lt;/table&gt;
@@ -138,57 +173,13 @@ add     PermitRootLogin No&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
 
 &lt;p&gt;For a comprehensive explanation on every fstab options, visit &lt;a href=&quot;https://wiki.debian.org/fstab&quot;&gt;the wiki&lt;/a&gt;&lt;/p&gt;
 
-&lt;h2 id=&quot;5-install-and-configure-transmission-daemon&quot;&gt;5) Install and configure transmission-daemon:&lt;/h2&gt;
-
-&lt;p&gt;Install the daemon with &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;apt&lt;/code&gt;:&lt;/p&gt;
-
-&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;apt &lt;span class=&quot;nb&quot;&gt;install &lt;/span&gt;transmission-daemon&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
-
-&lt;p&gt;And stop it:&lt;/p&gt;
-
-&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;systemctl stop transmission-deamon&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
-
-&lt;p&gt;Once it’s stopped, we can start editing the json config file:&lt;/p&gt;
-
-&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;vim /etc/transmission-daemon/settings.json
-Change download-dir     : /mnt/drive
-Change incomplete-dir   : /mnt/drive/
-Change rpc-whitelist    : add &lt;span class=&quot;k&quot;&gt;*&lt;/span&gt;
-Change rpc-username     : &lt;span class=&quot;s2&quot;&gt;&quot;user&quot;&lt;/span&gt; &lt;span class=&quot;c&quot;&gt;#Or what ever you want it to be&lt;/span&gt;
-Change rpc-password     : &lt;span class=&quot;s2&quot;&gt;&quot;yourpassword&quot;&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;in &lt;/span&gt;plain text &lt;span class=&quot;c&quot;&gt;#Will be encrypted on restart&lt;/span&gt;
-Change rpc-url          : /transmission/&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
-
-&lt;p&gt;All infos about every parameters are available here on the &lt;a href=&quot;https://github.com/transmission/transmission/wiki/Editing-Configuration-Files&quot;&gt;git&lt;/a&gt;.&lt;/p&gt;
-
-&lt;p&gt;Now we can restart the daemon and enable it:&lt;/p&gt;
-
-&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;systemctl restart transmission-daemon
-&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;systemctl &lt;span class=&quot;nb&quot;&gt;enable &lt;/span&gt;transmission-daemon&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
-
-&lt;p&gt;We can now access the RPC
-URL : http://raspberryIP:9091/transmission/web/&lt;/p&gt;
-
-&lt;p&gt;&lt;strong&gt;NOTE:&lt;/strong&gt; When the download is completed, you &lt;strong&gt;need&lt;/strong&gt; to manually Pause it and Restart it in order to start seeding.&lt;/p&gt;
-
 &lt;h2 id=&quot;6-create-the-network-share&quot;&gt;6) Create the network share&lt;/h2&gt;
+
+&lt;p&gt;&lt;strong&gt;NOTE:&lt;/strong&gt; This configuration is to allow anyone (user anonymous) to read the share, but not to write in it. You can find more informations into the  &lt;a href=&quot;https://www.samba.org/samba/docs/current/man-html/smb.conf.5.html&quot;&gt;smb.conf documentation&lt;/a&gt;&lt;/p&gt;
+
 &lt;p&gt;Install samba:&lt;/p&gt;
 
 &lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;apt &lt;span class=&quot;nb&quot;&gt;install &lt;/span&gt;samba&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
-
-&lt;p&gt;Then, create a user for authentication when accessing the share.
-&lt;strong&gt;NOTE:&lt;/strong&gt; You can skip this operation if, like me, you prefer to use the “pi” user.&lt;/p&gt;
-
-&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;useradd myuser
-&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;passwd myuser&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
-
-&lt;p&gt;Don’t forget to add the user to the &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;debian-transmission&lt;/code&gt; group:&lt;/p&gt;
-
-&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;usermod &lt;span class=&quot;nt&quot;&gt;-a&lt;/span&gt; &lt;span class=&quot;nt&quot;&gt;-G&lt;/span&gt; debian-transmission myuser&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
-
-&lt;p&gt;Now, we can add the user to the smbpasswd file to use if for authentication:&lt;/p&gt;
-
-&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;smbpasswd &lt;span class=&quot;nt&quot;&gt;-a&lt;/span&gt; myuser
-&lt;span class=&quot;c&quot;&gt;#Specify the same password, or an other one.&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
 
 &lt;p&gt;We can edit the Samba config file in order to add our directory to share:&lt;/p&gt;
 
@@ -202,7 +193,9 @@ public &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nb&qu
 &lt;span class=&quot;nb&quot;&gt;read &lt;/span&gt;only &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;yes
 &lt;/span&gt;guest ok &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;yes&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
 
-&lt;p&gt;&lt;strong&gt;NOTE:&lt;/strong&gt; This configuration is to allow anyone (user anonymous) to read the share, but not to write in it. You can find more informations into the  &lt;a href=&quot;https://www.samba.org/samba/docs/current/man-html/smb.conf.5.html&quot;&gt;smb.conf documentation&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;Restart samba to take into account the modifications we just did:&lt;/p&gt;
+
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;systemctl restart smbd&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
 
 &lt;h2 id=&quot;7-install-and-configure-openvpn&quot;&gt;7) Install and configure openvpn&lt;/h2&gt;
 &lt;p&gt;At this point, you already have a working seedbox, with a network share to access your downloaded files. We can take it a step further by configuring a VPN client.&lt;/p&gt;
@@ -236,8 +229,8 @@ When openvpn is installed from &lt;em&gt;“DEB package on Linux, the installer 
 
 &lt;p&gt;This step is only if you need to enter your credentials when connecting to the vpn server:&lt;/p&gt;
 
-&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;vim /etc/openvpn/yourfile.conf
-&lt;span class=&quot;c&quot;&gt;#Add &quot;.creds&quot; at the end of the line auth-user-pass&lt;/span&gt;
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;vim /etc/openvpn/client.conf
+&lt;span class=&quot;c&quot;&gt;#Add &quot; .creds&quot; at the end of the line auth-user-pass&lt;/span&gt;
 &lt;span class=&quot;c&quot;&gt;#Save and quit&lt;/span&gt;
 &lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;vim /etc/openvpn/.creds
 &lt;span class=&quot;c&quot;&gt;#Write the username on the first line&lt;/span&gt;
@@ -252,9 +245,11 @@ When openvpn is installed from &lt;em&gt;“DEB package on Linux, the installer 
 
 &lt;p&gt;And set a delay before the transmission-daemon starts (in order for the VPN tunnel to be turned on):&lt;/p&gt;
 
-&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;vim /etc/systemd/system/multi-user.target.wants
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;vim /etc/systemd/system/multi-user.target.wants/transmission-daemon.service
 &lt;span class=&quot;c&quot;&gt;#After the [Service], add :&lt;/span&gt;
 &lt;span class=&quot;nv&quot;&gt;ExecStartPre&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;/bin/sleep 30&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+
+&lt;p&gt;To take it a step further, you can implement a killswitch in the event that the VPN connection is terminated. Just follow &lt;a href=&quot;https://linuxconfig.org/how-to-create-a-vpn-killswitch-using-iptables-on-linux&quot;&gt;this tutorial&lt;/a&gt;.&lt;/p&gt;
 
 &lt;p&gt;At this point the seedbox is ready. Just restart the Raspberry Pi and check that you can access to the web interface.&lt;/p&gt;</content><author><name></name></author><category term="howto" /><category term="NAS" /><category term="Raspberry" /><category term="Pi" /><category term="Seedbox" /><category term="Creation" /><category term="torrent" /><category term="vpn" /><category term="openvpn" /><summary type="html"></summary></entry><entry><title type="html">Creating the blog with Jekyll and GitHub Pages</title><link href="http://localhost:4000/howto/2021/01/22/creating-the-blog-with-Jekyll.html" rel="alternate" type="text/html" title="Creating the blog with Jekyll and GitHub Pages" /><published>2021-01-22T13:30:34+01:00</published><updated>2021-01-22T13:30:34+01:00</updated><id>http://localhost:4000/howto/2021/01/22/creating-the-blog-with-Jekyll</id><content type="html" xml:base="http://localhost:4000/howto/2021/01/22/creating-the-blog-with-Jekyll.html">&lt;p&gt;&lt;img src=&quot;/assets/jekyllXgithub_banner.png&quot; alt=&quot;banner&quot; /&gt;&lt;/p&gt;
 

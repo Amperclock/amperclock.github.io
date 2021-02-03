@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1"><!-- Begin Jekyll SEO tag v2.6.1 -->
+<title>Removing adds with piHole and securing DNS requests with DoH | Amperclock’s Blog</title>
+<meta name="generator" content="Jekyll v3.9.0" />
+<meta property="og:title" content="Removing adds with piHole and securing DNS requests with DoH" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="Small blog about infosec, security tools developpement and howtos." />
+<meta property="og:description" content="Small blog about infosec, security tools developpement and howtos." />
+<link rel="canonical" href="http://localhost:4000/howto/2021/02/02/pihole-and-cloudflared.html" />
+<meta property="og:url" content="http://localhost:4000/howto/2021/02/02/pihole-and-cloudflared.html" />
+<meta property="og:site_name" content="Amperclock’s Blog" />
+<meta property="og:type" content="article" />
+<meta property="article:published_time" content="2021-02-02T14:30:00+01:00" />
+<script type="application/ld+json">
+{"@type":"BlogPosting","headline":"Removing adds with piHole and securing DNS requests with DoH","dateModified":"2021-02-02T14:30:00+01:00","datePublished":"2021-02-02T14:30:00+01:00","url":"http://localhost:4000/howto/2021/02/02/pihole-and-cloudflared.html","mainEntityOfPage":{"@type":"WebPage","@id":"http://localhost:4000/howto/2021/02/02/pihole-and-cloudflared.html"},"description":"Small blog about infosec, security tools developpement and howtos.","@context":"https://schema.org"}</script>
+<!-- End Jekyll SEO tag -->
+<link rel="stylesheet" href="/assets/css/style.css"><link type="application/atom+xml" rel="alternate" href="http://localhost:4000/feed.xml" title="Amperclock's Blog" />
+</head>
+<body><header class="site-header">
+
+  <div class="wrapper"><a class="site-title" rel="author" href="/">Amperclock&#39;s Blog</a><nav class="site-nav">
+        <input type="checkbox" id="nav-trigger" class="nav-trigger" />
+        <label for="nav-trigger">
+          <span class="menu-icon">
+            <svg viewBox="0 0 18 15" width="18px" height="15px">
+              <path d="M18,1.484c0,0.82-0.665,1.484-1.484,1.484H1.484C0.665,2.969,0,2.304,0,1.484l0,0C0,0.665,0.665,0,1.484,0 h15.032C17.335,0,18,0.665,18,1.484L18,1.484z M18,7.516C18,8.335,17.335,9,16.516,9H1.484C0.665,9,0,8.335,0,7.516l0,0 c0-0.82,0.665-1.484,1.484-1.484h15.032C17.335,6.031,18,6.696,18,7.516L18,7.516z M18,13.516C18,14.335,17.335,15,16.516,15H1.484 C0.665,15,0,14.335,0,13.516l0,0c0-0.82,0.665-1.483,1.484-1.483h15.032C17.335,12.031,18,12.695,18,13.516L18,13.516z"/>
+            </svg>
+          </span>
+        </label>
+
+        <div class="trigger"><a class="page-link" href="/about/">About</a></div>
+      </nav></div>
+</header>
+<main class="page-content" aria-label="Content">
+      <div class="wrapper">
+        <article class="post h-entry" itemscope itemtype="http://schema.org/BlogPosting">
+
+  <header class="post-header">
+    <h1 class="post-title p-name" itemprop="name headline">Removing adds with piHole and securing DNS requests with DoH</h1>
+    <p class="post-meta"><time class="dt-published" datetime="2021-02-02T14:30:00+01:00" itemprop="datePublished">
+        Feb 2, 2021
+      </time></p>
+  </header>
+
+  <div class="post-content e-content" itemprop="articleBody">
+    <p><img src="/assets/pihole_cloudflared.png" alt="banner" /></p>
+
+<p>DNS Is one of those things that is use without any thought by normal users. Being able to remember websites names instead of their IP addresses is a must when it comes to browsing easily the web. The problem is that DNS was created more than <a href="https://en.wikipedia.org/wiki/Domain_Name_System">35 years ago</a>, with different priorities in mind. To this day, DNS (by default) remains unencrypted: you can clearly see the resolving requests made by a user by sniffing the traffic. We’ll see how the introduction of the <em>relatively</em> recent cloudflare’s DNS servers and the DNS-Over-HTTP (DoH) protocol can help us use DNS safely.</p>
+
+<p>Oh, and when it comes to piHole, I think we can all agreed that ads are annoying. Tied to the aging buisness model of the internet, they are everywhere and are constantly plaguing my browsing and viewing experience. So we’ll take care if that too.</p>
+
+<p><img src="/assets/articles/wireshark_dns.png" alt="picture" /></p>
+
+<h2 id="1-necessary-material">1) Necessary material</h2>
+<ul>
+  <li>A Raspberry pi (I’ll use a 3, but a Zero is more tailored for this kind of application)</li>
+  <li>An SD Card of at least 4GB</li>
+</ul>
+
+<p>piHole is usually installed on a Raspberry Pi Zero thanks to the fact that it is lightweight. Because I don’t have one <em>yet</em>, I’ll be installing it on my old Raspberry pi 3.</p>
+
+<h2 id="2-installing-raspberry-pi-os-raspbian">2) Installing Raspberry Pi OS (Raspbian)</h2>
+
+<p>I’ll copy/paste this part from my previous post. Yes, I’m that lazy.</p>
+
+<p>Let’s start by downloading the Raspberry pi OS (previously called Raspbian): 
+Go to the <a href="https://www.raspberrypi.org/software/operating-systems/">download page</a> and choose the Raspberry Pi OS <strong>Lite</strong>. We don’t need any graphical interface or any tools with a GUI for this project.</p>
+
+<p>Once downloaded, burn it on the SD card:</p>
+
+<figure class="highlight"><pre><code class="language-bash" data-lang="bash"><span class="nv">$ </span><span class="nb">dd </span><span class="nv">bs</span><span class="o">=</span>4M <span class="k">if</span><span class="o">=</span>2021-01-11-raspios-buster-armhf.img <span class="nv">of</span><span class="o">=</span>/dev/sdX <span class="nv">conv</span><span class="o">=</span>fsync</code></pre></figure>
+
+<p>Insert the SD card into the Raspberry, connect a screen with HDMI, and power it up by connecting the USB power cable. Once the startup sequence is finished, you are invited to log in. Use the default credentials :</p>
+
+<figure class="highlight"><pre><code class="language-bash" data-lang="bash">user    pi
+pass    raspberry</code></pre></figure>
+
+<p>Use the rapsberry utility to change your keyboard layout if needed (more informations about the raspi-config <a href="https://discourse.pi-hole.net/t/enabling-https-for-your-pi-hole-web-interface/5771">here</a>):</p>
+
+<figure class="highlight"><pre><code class="language-bash" data-lang="bash"><span class="nv">$ </span>raspi-config</code></pre></figure>
+
+<p>For security reasons, change the defaults passwords:</p>
+
+<figure class="highlight"><pre><code class="language-bash" data-lang="bash"><span class="nv">$ </span>su   <span class="c"># Change user to root </span>
+ <span class="c">#Enter the password of the pi user (rapberry)</span>
+<span class="nv">$ </span>passwd    <span class="c">#To change the root password</span>
+<span class="nv">$ </span>passwd pi <span class="c">#to change the pi user password</span></code></pre></figure>
+
+<p>Don’t forget to make sure that all your packages are up to date, and install any pending updates:</p>
+
+<figure class="highlight"><pre><code class="language-bash" data-lang="bash"><span class="nv">$ </span>apt update <span class="o">&amp;&amp;</span> apt upgrade</code></pre></figure>
+
+<p>Change your hostname in order to better identify the pi on your network:</p>
+
+<figure class="highlight"><pre><code class="language-bash" data-lang="bash"><span class="nv">$ </span>hostnamectl set-hostname piDNS</code></pre></figure>
+
+<h2 id="3-installing-pihole">3) Installing piHole</h2>
+
+<p>The installation of piHole is pretty straight forward, thanks to the scrip they provide. To run it, simply execute:</p>
+
+<figure class="highlight"><pre><code class="language-bash" data-lang="bash"><span class="nv">$ </span>curl <span class="nt">-sSL</span> https://install.pi-hole.net | bash</code></pre></figure>
+
+<p>Then, just keep following the installation Wizard. Nothing’s too complicated to understand. I’ve changed my privacy option to all anonymize; I don’t want to log the browsing activity of my users, and it’s much safer is someone succeed to hack into the piHole, they won’t have much to see.</p>
+
+<p>At the end of the installation process, you will receive a temporary password to access to the administration page of the piHole. Don’t forget to change it with:</p>
+
+<figure class="highlight"><pre><code class="language-bash" data-lang="bash"><span class="nv">$ </span>pihole <span class="nt">-a</span> <span class="nt">-p</span></code></pre></figure>
+
+<p>I <em>STRONGLY</em> recommend you to setup and SSL certificate and to have some HTTPS, or somebody could retrieve your password by sniffing the network.
+Everything is explained <a href="https://discourse.pi-hole.net/t/enabling-https-for-your-pi-hole-web-interface/5771">here</a>.</p>
+
+<p>Now, you can access the piHole’s web interface by going to <code class="language-plaintext highlighter-rouge">http://[piHoleIP]/admin</code> (or <code class="language-plaintext highlighter-rouge">https://[piHoleIP]/admin</code> if you’ve followed the recommendation).</p>
+
+<p>To use it, connect to you router (or anything to your DHCP), and change the DNS server address to the one of you piHole. You can also go directly to you device, and change the DNS configuration to use your piHole.</p>
+
+<p><strong>SIDENOTE</strong>: Some of the most brilliant router manufacturers *cough* <strong>netgear for exemple</strong> will <em>still</em> serve their own IP address as DNS in the DHCP answer, and querry the piHole themselves, making an unnecessary hop (and raising privacy concern).</p>
+
+<p><img src="/assets/articles/whathehellnetgear.png" alt="whathehellnetgear" /></p>
+
+<p>The solution to this is to use your own DHCP server, and serve whatever DNS ip you want, like the one from the piHole <strong>OR</strong> change the DNS settings on each of your devices.</p>
+
+<h2 id="4-installing-cloudflared-to-enable-doh">4) Installing cloudflared to enable DoH</h2>
+
+<p>Alright, so now that we got rid of the ads, let’s encrypt our DNS requests, so our Internet Provider wont eavesdrop the domains we looking up.</p>
+
+<p><strong>NOTE</strong>: All the following commands are as <code class="language-plaintext highlighter-rouge">root</code>. We gonna use nano since vim is not installed by default on raspberryPiOS</p>
+
+<p>We’ll be using a tool created by CloudFlare (in addition to using their excellent DNS servers). Let’s download and install it:</p>
+
+<figure class="highlight"><pre><code class="language-bash" data-lang="bash"><span class="nv">$ </span>wget https://bin.equinox.io/c/VdrWdbjqyF/cloudflared-stable-linux-arm.tgz
+<span class="nv">$ </span><span class="nb">tar</span> <span class="nt">-xvzf</span> cloudflared-stable-linux-arm.tgz
+<span class="nv">$ </span><span class="nb">cp</span> ./cloudflared /usr/local/bin
+<span class="nv">$ </span><span class="nb">chmod</span> +x /usr/local/bin/cloudflared
+<span class="nv">$ </span>cloudflared <span class="nt">-v</span></code></pre></figure>
+
+<p>We’ll create user for the daemon to run:</p>
+
+<figure class="highlight"><pre><code class="language-bash" data-lang="bash"><span class="nv">$ </span>useradd <span class="nt">-s</span> /usr/sbin/nologin <span class="nt">-r</span> <span class="nt">-M</span> cloudflared</code></pre></figure>
+
+<p>Then modify the configuration file of cloudflared. You can change the –upstream by any DNS server that supports DoH:</p>
+
+<figure class="highlight"><pre><code class="language-bash" data-lang="bash"><span class="nv">$ </span>nano /etc/default/cloudflared
+
+<span class="c">#Add:</span>
+<span class="nv">CLOUDFLARED_OPTS</span><span class="o">=</span><span class="nt">--port</span> 5053 <span class="nt">--upstream</span> https://1.1.1.1/dns-query <span class="nt">--upstream</span> https://1.0.0.1/dns-query</code></pre></figure>
+
+<p>Update the permissions for the configuration file and cloudflared binary to allow access for the cloudflared user:</p>
+
+<figure class="highlight"><pre><code class="language-bash" data-lang="bash"><span class="nv">$ </span><span class="nb">chown </span>cloudflared:cloudflared /etc/default/cloudflared
+<span class="nv">$ </span><span class="nb">chown </span>cloudflared:cloudflared /usr/local/bin/cloudflared</code></pre></figure>
+
+<p>Then create the systemd script by copying the following into /etc/systemd/system/cloudflared.service. This will control the running of the service and allow it to run on startup:</p>
+
+<figure class="highlight"><pre><code class="language-bash" data-lang="bash"><span class="nv">$ </span>nano /etc/systemd/system/cloudflared.service
+
+<span class="c">#Add:</span>
+<span class="o">[</span>Unit]
+<span class="nv">Description</span><span class="o">=</span>cloudflared DNS over HTTPS proxy
+<span class="nv">After</span><span class="o">=</span>syslog.target network-online.target
+
+<span class="o">[</span>Service]
+<span class="nv">Type</span><span class="o">=</span>simple
+<span class="nv">User</span><span class="o">=</span>cloudflared
+<span class="nv">EnvironmentFile</span><span class="o">=</span>/etc/default/cloudflared
+<span class="nv">ExecStart</span><span class="o">=</span>/usr/local/bin/cloudflared proxy-dns <span class="nv">$CLOUDFLARED_OPTS</span>
+<span class="nv">Restart</span><span class="o">=</span>on-failure
+<span class="nv">RestartSec</span><span class="o">=</span>10
+<span class="nv">KillMode</span><span class="o">=</span>process
+
+<span class="o">[</span>Install]
+<span class="nv">WantedBy</span><span class="o">=</span>multi-user.target</code></pre></figure>
+
+<p>Enable the systemd service to run on startup, then start the service, check its status and try it:</p>
+
+<figure class="highlight"><pre><code class="language-bash" data-lang="bash"><span class="nv">$ </span>systemctl <span class="nb">enable </span>cloudflared
+<span class="nv">$ </span>systemctl start cloudflared
+<span class="nv">$ </span>systemctl status cloudflared
+
+dig @127.0.0.1 <span class="nt">-p</span> 5053 amperclock.com</code></pre></figure>
+
+<figure class="highlight"><pre><code class="language-text" data-lang="text">; &lt;&lt;&gt;&gt; DiG 9.11.5-P4-5.1+deb10u2-Raspbian &lt;&lt;&gt;&gt; @127.0.0.1 -p 5053 amperclock.com
+; (1 server found)
+;; global options: +cmd
+;; Got answer:
+;; -&gt;&gt;HEADER&lt;&lt;- opcode: QUERY, status: NOERROR, id: 53310
+;; flags: qr rd ra ad; QUERY: 1, ANSWER: 0, AUTHORITY: 1, ADDITIONAL: 1
+
+;; OPT PSEUDOSECTION:
+; EDNS: version: 0, flags:; udp: 4096
+;; QUESTION SECTION:
+;amperclock.com.			IN	A
+
+;; AUTHORITY SECTION:
+amperclock.com.		300	IN	SOA	dns108.ovh.net. tech.ovh.net. 2021020206 86400 3600 3600000 300
+
+;; Query time: 201 msec
+;; SERVER: 127.0.0.1#5053(127.0.0.1)
+;; WHEN: Wed Feb 03 22:00:34 GMT 2021
+;; MSG SIZE  rcvd: 119</code></pre></figure>
+
+<p>Success ! We now have a local DNS server that transmit our DNS queries via HTTPS and answering on the port 5053. We can now configure ou piHole to use it as an Upstream DNS server. Got the <strong>web interface</strong>, <strong>log-in</strong>, then go to <strong>settings</strong>, and to the <strong>DNS</strong> tab. Now, uncheck any DNS server that you previously had, and add the custom one <code class="language-plaintext highlighter-rouge">127.0.0.1#5053</code>. Don’t forget to save.</p>
+
+<p><img src="/assets/articles/piholeupstream.png" alt="piholeupstream" /></p>
+
+<p>But we still need to make sure that our <code class="language-plaintext highlighter-rouge">cloudflared</code> service is up-to-date. Since we didn’t installed it via our package manager, we need to update it manually.</p>
+
+<p>For that, just run the following commands:</p>
+
+<figure class="highlight"><pre><code class="language-bash" data-lang="bash">wget https://bin.equinox.io/c/VdrWdbjqyF/cloudflared-stable-linux-arm.tgz
+<span class="nb">tar</span> <span class="nt">-xvzf</span> cloudflared-stable-linux-arm.tgz
+<span class="nv">$ </span>systemctl stop cloudflared
+<span class="nv">$ </span><span class="nb">cp</span> ./cloudflared /usr/local/bin
+<span class="nv">$ </span><span class="nb">chmod</span> +x /usr/local/bin/cloudflared
+<span class="nv">$ </span>systemctl start cloudflared
+cloudflared <span class="nt">-v</span>
+<span class="nv">$ </span>systemctl status cloudflared</code></pre></figure>
+
+<p>You can also set-up automatic update by following the <a href="https://docs.pi-hole.net/guides/dns/cloudflared/#automating-cloudflared-updates">official piHole documentation</a>.</p>
+
+
+  </div><a class="u-url" href="/howto/2021/02/02/pihole-and-cloudflared.html" hidden></a>
+</article>
+
+      </div>
+    </main><footer class="site-footer h-card">
+  <data class="u-url" href="/"></data>
+
+  <div class="wrapper">
+
+    <div class="footer-col-wrapper">
+      <div class="footer-col">
+        <p class="feed-subscribe">
+          <a href="/feed.xml">
+            <svg class="svg-icon orange">
+              <use xlink:href="/assets/minima-social-icons.svg#rss"></use>
+            </svg><span>Subscribe</span>
+          </a>
+        </p>
+      </div>
+      <div class="footer-col">
+        <p>Small blog about infosec, security tools developpement and howtos.</p>
+      </div>
+    </div>
+
+    <div class="social-links"><ul class="social-media-list"></ul>
+</div>
+
+  </div>
+
+</footer>
+</body>
+
+</html>

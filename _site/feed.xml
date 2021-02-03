@@ -1,4 +1,176 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="3.9.0">Jekyll</generator><link href="http://localhost:4000/feed.xml" rel="self" type="application/atom+xml" /><link href="http://localhost:4000/" rel="alternate" type="text/html" /><updated>2021-01-25T22:35:28+01:00</updated><id>http://localhost:4000/feed.xml</id><title type="html">Amperclock’s Blog</title><subtitle>Small blog about infosec, security tools developpement and howtos.</subtitle><entry><title type="html">Creating a seedbox and a NAS with a RaspberryPi</title><link href="http://localhost:4000/howto/2021/01/23/creating-NAS-seedbox-raspberry-pi.html" rel="alternate" type="text/html" title="Creating a seedbox and a NAS with a RaspberryPi" /><published>2021-01-23T11:00:00+01:00</published><updated>2021-01-23T11:00:00+01:00</updated><id>http://localhost:4000/howto/2021/01/23/creating-NAS-seedbox-raspberry-pi</id><content type="html" xml:base="http://localhost:4000/howto/2021/01/23/creating-NAS-seedbox-raspberry-pi.html">&lt;p&gt;&lt;img src=&quot;/assets/raspberry-seedbox_banner.png&quot; alt=&quot;banner&quot; /&gt;&lt;/p&gt;
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="3.9.0">Jekyll</generator><link href="http://localhost:4000/feed.xml" rel="self" type="application/atom+xml" /><link href="http://localhost:4000/" rel="alternate" type="text/html" /><updated>2021-02-03T23:07:09+01:00</updated><id>http://localhost:4000/feed.xml</id><title type="html">Amperclock’s Blog</title><subtitle>Small blog about infosec, security tools developpement and howtos.</subtitle><entry><title type="html">Removing adds with piHole and securing DNS requests with DoH</title><link href="http://localhost:4000/howto/2021/02/02/pihole-and-cloudflared.html" rel="alternate" type="text/html" title="Removing adds with piHole and securing DNS requests with DoH" /><published>2021-02-02T14:30:00+01:00</published><updated>2021-02-02T14:30:00+01:00</updated><id>http://localhost:4000/howto/2021/02/02/pihole-and-cloudflared</id><content type="html" xml:base="http://localhost:4000/howto/2021/02/02/pihole-and-cloudflared.html">&lt;p&gt;&lt;img src=&quot;/assets/pihole_cloudflared.png&quot; alt=&quot;banner&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;DNS Is one of those things that is use without any thought by normal users. Being able to remember websites names instead of their IP addresses is a must when it comes to browsing easily the web. The problem is that DNS was created more than &lt;a href=&quot;https://en.wikipedia.org/wiki/Domain_Name_System&quot;&gt;35 years ago&lt;/a&gt;, with different priorities in mind. To this day, DNS (by default) remains unencrypted: you can clearly see the resolving requests made by a user by sniffing the traffic. We’ll see how the introduction of the &lt;em&gt;relatively&lt;/em&gt; recent cloudflare’s DNS servers and the DNS-Over-HTTP (DoH) protocol can help us use DNS safely.&lt;/p&gt;
+
+&lt;p&gt;Oh, and when it comes to piHole, I think we can all agreed that ads are annoying. Tied to the aging buisness model of the internet, they are everywhere and are constantly plaguing my browsing and viewing experience. So we’ll take care if that too.&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/assets/articles/wireshark_dns.png&quot; alt=&quot;picture&quot; /&gt;&lt;/p&gt;
+
+&lt;h2 id=&quot;1-necessary-material&quot;&gt;1) Necessary material&lt;/h2&gt;
+&lt;ul&gt;
+  &lt;li&gt;A Raspberry pi (I’ll use a 3, but a Zero is more tailored for this kind of application)&lt;/li&gt;
+  &lt;li&gt;An SD Card of at least 4GB&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;piHole is usually installed on a Raspberry Pi Zero thanks to the fact that it is lightweight. Because I don’t have one &lt;em&gt;yet&lt;/em&gt;, I’ll be installing it on my old Raspberry pi 3.&lt;/p&gt;
+
+&lt;h2 id=&quot;2-installing-raspberry-pi-os-raspbian&quot;&gt;2) Installing Raspberry Pi OS (Raspbian)&lt;/h2&gt;
+
+&lt;p&gt;I’ll copy/paste this part from my previous post. Yes, I’m that lazy.&lt;/p&gt;
+
+&lt;p&gt;Let’s start by downloading the Raspberry pi OS (previously called Raspbian): 
+Go to the &lt;a href=&quot;https://www.raspberrypi.org/software/operating-systems/&quot;&gt;download page&lt;/a&gt; and choose the Raspberry Pi OS &lt;strong&gt;Lite&lt;/strong&gt;. We don’t need any graphical interface or any tools with a GUI for this project.&lt;/p&gt;
+
+&lt;p&gt;Once downloaded, burn it on the SD card:&lt;/p&gt;
+
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;dd &lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;bs&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;4M &lt;span class=&quot;k&quot;&gt;if&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;2021-01-11-raspios-buster-armhf.img &lt;span class=&quot;nv&quot;&gt;of&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;/dev/sdX &lt;span class=&quot;nv&quot;&gt;conv&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;fsync&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+
+&lt;p&gt;Insert the SD card into the Raspberry, connect a screen with HDMI, and power it up by connecting the USB power cable. Once the startup sequence is finished, you are invited to log in. Use the default credentials :&lt;/p&gt;
+
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;user    pi
+pass    raspberry&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+
+&lt;p&gt;Use the rapsberry utility to change your keyboard layout if needed (more informations about the raspi-config &lt;a href=&quot;https://discourse.pi-hole.net/t/enabling-https-for-your-pi-hole-web-interface/5771&quot;&gt;here&lt;/a&gt;):&lt;/p&gt;
+
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;raspi-config&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+
+&lt;p&gt;For security reasons, change the defaults passwords:&lt;/p&gt;
+
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;su   &lt;span class=&quot;c&quot;&gt;# Change user to root &lt;/span&gt;
+ &lt;span class=&quot;c&quot;&gt;#Enter the password of the pi user (rapberry)&lt;/span&gt;
+&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;passwd    &lt;span class=&quot;c&quot;&gt;#To change the root password&lt;/span&gt;
+&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;passwd pi &lt;span class=&quot;c&quot;&gt;#to change the pi user password&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+
+&lt;p&gt;Don’t forget to make sure that all your packages are up to date, and install any pending updates:&lt;/p&gt;
+
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;apt update &lt;span class=&quot;o&quot;&gt;&amp;amp;&amp;amp;&lt;/span&gt; apt upgrade&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+
+&lt;p&gt;Change your hostname in order to better identify the pi on your network:&lt;/p&gt;
+
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;hostnamectl set-hostname piDNS&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+
+&lt;h2 id=&quot;3-installing-pihole&quot;&gt;3) Installing piHole&lt;/h2&gt;
+
+&lt;p&gt;The installation of piHole is pretty straight forward, thanks to the scrip they provide. To run it, simply execute:&lt;/p&gt;
+
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;curl &lt;span class=&quot;nt&quot;&gt;-sSL&lt;/span&gt; https://install.pi-hole.net | bash&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+
+&lt;p&gt;Then, just keep following the installation Wizard. Nothing’s too complicated to understand. I’ve changed my privacy option to all anonymize; I don’t want to log the browsing activity of my users, and it’s much safer is someone succeed to hack into the piHole, they won’t have much to see.&lt;/p&gt;
+
+&lt;p&gt;At the end of the installation process, you will receive a temporary password to access to the administration page of the piHole. Don’t forget to change it with:&lt;/p&gt;
+
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;pihole &lt;span class=&quot;nt&quot;&gt;-a&lt;/span&gt; &lt;span class=&quot;nt&quot;&gt;-p&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+
+&lt;p&gt;I &lt;em&gt;STRONGLY&lt;/em&gt; recommend you to setup and SSL certificate and to have some HTTPS, or somebody could retrieve your password by sniffing the network.
+Everything is explained &lt;a href=&quot;https://discourse.pi-hole.net/t/enabling-https-for-your-pi-hole-web-interface/5771&quot;&gt;here&lt;/a&gt;.&lt;/p&gt;
+
+&lt;p&gt;Now, you can access the piHole’s web interface by going to &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;http://[piHoleIP]/admin&lt;/code&gt; (or &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;https://[piHoleIP]/admin&lt;/code&gt; if you’ve followed the recommendation).&lt;/p&gt;
+
+&lt;p&gt;To use it, connect to you router (or anything to your DHCP), and change the DNS server address to the one of you piHole. You can also go directly to you device, and change the DNS configuration to use your piHole.&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;SIDENOTE&lt;/strong&gt;: Some of the most brilliant router manufacturers *cough* &lt;strong&gt;netgear for exemple&lt;/strong&gt; will &lt;em&gt;still&lt;/em&gt; serve their own IP address as DNS in the DHCP answer, and querry the piHole themselves, making an unnecessary hop (and raising privacy concern).&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/assets/articles/whathehellnetgear.png&quot; alt=&quot;whathehellnetgear&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;The solution to this is to use your own DHCP server, and serve whatever DNS ip you want, like the one from the piHole &lt;strong&gt;OR&lt;/strong&gt; change the DNS settings on each of your devices.&lt;/p&gt;
+
+&lt;h2 id=&quot;4-installing-cloudflared-to-enable-doh&quot;&gt;4) Installing cloudflared to enable DoH&lt;/h2&gt;
+
+&lt;p&gt;Alright, so now that we got rid of the ads, let’s encrypt our DNS requests, so our Internet Provider wont eavesdrop the domains we looking up.&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;NOTE&lt;/strong&gt;: All the following commands are as &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;root&lt;/code&gt;. We gonna use nano since vim is not installed by default on raspberryPiOS&lt;/p&gt;
+
+&lt;p&gt;We’ll be using a tool created by CloudFlare (in addition to using their excellent DNS servers). Let’s download and install it:&lt;/p&gt;
+
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;wget https://bin.equinox.io/c/VdrWdbjqyF/cloudflared-stable-linux-arm.tgz
+&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;tar&lt;/span&gt; &lt;span class=&quot;nt&quot;&gt;-xvzf&lt;/span&gt; cloudflared-stable-linux-arm.tgz
+&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;cp&lt;/span&gt; ./cloudflared /usr/local/bin
+&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;chmod&lt;/span&gt; +x /usr/local/bin/cloudflared
+&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;cloudflared &lt;span class=&quot;nt&quot;&gt;-v&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+
+&lt;p&gt;We’ll create user for the daemon to run:&lt;/p&gt;
+
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;useradd &lt;span class=&quot;nt&quot;&gt;-s&lt;/span&gt; /usr/sbin/nologin &lt;span class=&quot;nt&quot;&gt;-r&lt;/span&gt; &lt;span class=&quot;nt&quot;&gt;-M&lt;/span&gt; cloudflared&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+
+&lt;p&gt;Then modify the configuration file of cloudflared. You can change the –upstream by any DNS server that supports DoH:&lt;/p&gt;
+
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;nano /etc/default/cloudflared
+
+&lt;span class=&quot;c&quot;&gt;#Add:&lt;/span&gt;
+&lt;span class=&quot;nv&quot;&gt;CLOUDFLARED_OPTS&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;nt&quot;&gt;--port&lt;/span&gt; 5053 &lt;span class=&quot;nt&quot;&gt;--upstream&lt;/span&gt; https://1.1.1.1/dns-query &lt;span class=&quot;nt&quot;&gt;--upstream&lt;/span&gt; https://1.0.0.1/dns-query&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+
+&lt;p&gt;Update the permissions for the configuration file and cloudflared binary to allow access for the cloudflared user:&lt;/p&gt;
+
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;chown &lt;/span&gt;cloudflared:cloudflared /etc/default/cloudflared
+&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;chown &lt;/span&gt;cloudflared:cloudflared /usr/local/bin/cloudflared&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+
+&lt;p&gt;Then create the systemd script by copying the following into /etc/systemd/system/cloudflared.service. This will control the running of the service and allow it to run on startup:&lt;/p&gt;
+
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;nano /etc/systemd/system/cloudflared.service
+
+&lt;span class=&quot;c&quot;&gt;#Add:&lt;/span&gt;
+&lt;span class=&quot;o&quot;&gt;[&lt;/span&gt;Unit]
+&lt;span class=&quot;nv&quot;&gt;Description&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;cloudflared DNS over HTTPS proxy
+&lt;span class=&quot;nv&quot;&gt;After&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;syslog.target network-online.target
+
+&lt;span class=&quot;o&quot;&gt;[&lt;/span&gt;Service]
+&lt;span class=&quot;nv&quot;&gt;Type&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;simple
+&lt;span class=&quot;nv&quot;&gt;User&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;cloudflared
+&lt;span class=&quot;nv&quot;&gt;EnvironmentFile&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;/etc/default/cloudflared
+&lt;span class=&quot;nv&quot;&gt;ExecStart&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;/usr/local/bin/cloudflared proxy-dns &lt;span class=&quot;nv&quot;&gt;$CLOUDFLARED_OPTS&lt;/span&gt;
+&lt;span class=&quot;nv&quot;&gt;Restart&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;on-failure
+&lt;span class=&quot;nv&quot;&gt;RestartSec&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;10
+&lt;span class=&quot;nv&quot;&gt;KillMode&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;process
+
+&lt;span class=&quot;o&quot;&gt;[&lt;/span&gt;Install]
+&lt;span class=&quot;nv&quot;&gt;WantedBy&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;multi-user.target&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+
+&lt;p&gt;Enable the systemd service to run on startup, then start the service, check its status and try it:&lt;/p&gt;
+
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;systemctl &lt;span class=&quot;nb&quot;&gt;enable &lt;/span&gt;cloudflared
+&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;systemctl start cloudflared
+&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;systemctl status cloudflared
+
+dig @127.0.0.1 &lt;span class=&quot;nt&quot;&gt;-p&lt;/span&gt; 5053 amperclock.com&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-text&quot; data-lang=&quot;text&quot;&gt;; &amp;lt;&amp;lt;&amp;gt;&amp;gt; DiG 9.11.5-P4-5.1+deb10u2-Raspbian &amp;lt;&amp;lt;&amp;gt;&amp;gt; @127.0.0.1 -p 5053 amperclock.com
+; (1 server found)
+;; global options: +cmd
+;; Got answer:
+;; -&amp;gt;&amp;gt;HEADER&amp;lt;&amp;lt;- opcode: QUERY, status: NOERROR, id: 53310
+;; flags: qr rd ra ad; QUERY: 1, ANSWER: 0, AUTHORITY: 1, ADDITIONAL: 1
+
+;; OPT PSEUDOSECTION:
+; EDNS: version: 0, flags:; udp: 4096
+;; QUESTION SECTION:
+;amperclock.com.			IN	A
+
+;; AUTHORITY SECTION:
+amperclock.com.		300	IN	SOA	dns108.ovh.net. tech.ovh.net. 2021020206 86400 3600 3600000 300
+
+;; Query time: 201 msec
+;; SERVER: 127.0.0.1#5053(127.0.0.1)
+;; WHEN: Wed Feb 03 22:00:34 GMT 2021
+;; MSG SIZE  rcvd: 119&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+
+&lt;p&gt;Success ! We now have a local DNS server that transmit our DNS queries via HTTPS and answering on the port 5053. We can now configure ou piHole to use it as an Upstream DNS server. Got the &lt;strong&gt;web interface&lt;/strong&gt;, &lt;strong&gt;log-in&lt;/strong&gt;, then go to &lt;strong&gt;settings&lt;/strong&gt;, and to the &lt;strong&gt;DNS&lt;/strong&gt; tab. Now, uncheck any DNS server that you previously had, and add the custom one &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;127.0.0.1#5053&lt;/code&gt;. Don’t forget to save.&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/assets/articles/piholeupstream.png&quot; alt=&quot;piholeupstream&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;But we still need to make sure that our &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;cloudflared&lt;/code&gt; service is up-to-date. Since we didn’t installed it via our package manager, we need to update it manually.&lt;/p&gt;
+
+&lt;p&gt;For that, just run the following commands:&lt;/p&gt;
+
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;wget https://bin.equinox.io/c/VdrWdbjqyF/cloudflared-stable-linux-arm.tgz
+&lt;span class=&quot;nb&quot;&gt;tar&lt;/span&gt; &lt;span class=&quot;nt&quot;&gt;-xvzf&lt;/span&gt; cloudflared-stable-linux-arm.tgz
+&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;systemctl stop cloudflared
+&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;cp&lt;/span&gt; ./cloudflared /usr/local/bin
+&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;chmod&lt;/span&gt; +x /usr/local/bin/cloudflared
+&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;systemctl start cloudflared
+cloudflared &lt;span class=&quot;nt&quot;&gt;-v&lt;/span&gt;
+&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;systemctl status cloudflared&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+
+&lt;p&gt;You can also set-up automatic update by following the &lt;a href=&quot;https://docs.pi-hole.net/guides/dns/cloudflared/#automating-cloudflared-updates&quot;&gt;official piHole documentation&lt;/a&gt;.&lt;/p&gt;</content><author><name></name></author><category term="howto" /><category term="DNS" /><category term="Raspberry" /><category term="Pi" /><category term="piHole" /><category term="Cloudflare" /><category term="cloudflared" /><category term="DoH" /><category term="DNS-Over-HTTPS" /><summary type="html"></summary></entry><entry><title type="html">Creating a seedbox and a NAS with a RaspberryPi</title><link href="http://localhost:4000/howto/2021/01/23/creating-NAS-seedbox-raspberry-pi.html" rel="alternate" type="text/html" title="Creating a seedbox and a NAS with a RaspberryPi" /><published>2021-01-23T11:00:00+01:00</published><updated>2021-01-23T11:00:00+01:00</updated><id>http://localhost:4000/howto/2021/01/23/creating-NAS-seedbox-raspberry-pi</id><content type="html" xml:base="http://localhost:4000/howto/2021/01/23/creating-NAS-seedbox-raspberry-pi.html">&lt;p&gt;&lt;img src=&quot;/assets/raspberry-seedbox_banner.png&quot; alt=&quot;banner&quot; /&gt;&lt;/p&gt;
 
 &lt;p&gt;In this post, we’ll see how to create a seedbox for your torrents, and how to create a samba network share to make them available to your local network. Torrents needs users in order to work properly: if no one is seeding the file, you can’t download it. So it’s a good practice to seed during a certain period of time the file that you just downloaded, especially when there’s only a few seeders.&lt;/p&gt;
 
